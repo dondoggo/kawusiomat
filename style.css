@@ -470,6 +470,69 @@ header h1 {
     opacity: 0.5;
 }
 
+/* Info bars */
+
+#recipe-tips {
+    margin-top: 1.5rem;
+}
+
+#recipe-tips h3 {
+    color: var(--accent);
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+.info-bar {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    border-left: 3px solid transparent;
+}
+
+.info-bar:last-child {
+    margin-bottom: 0;
+}
+
+.info-bar-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.info-bar-body {
+    flex: 1;
+}
+
+.info-bar-title {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.info-bar.bloom {
+    background: #fef9e7;
+    border-left-color: #f0c040;
+}
+
+.info-bar.temp {
+    background: #e8f4fd;
+    border-left-color: #70b8e8;
+}
+
+.info-bar.milk {
+    background: #fdf2f0;
+    border-left-color: #e0a090;
+}
+
+.info-bar.grind {
+    background: #f3efe8;
+    border-left-color: var(--accent-light);
+}
+
 /* Hidden */
 
 .hidden {

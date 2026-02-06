@@ -355,6 +355,7 @@
         renderSummary(recipe);
         renderBreakdown(recipe);
         renderSteps(generateSteps(recipe));
+        renderTips(recipe);
     }
 
     function renderSummary(recipe) {
@@ -455,49 +456,111 @@
     function generateSteps(recipe) {
         var steps = [];
         var needsMilk = (recipe.totalMilk + recipe.totalFoam) > 0;
+        var totalMilkMl = recipe.totalMilk + recipe.totalFoam;
 
+        // Blooming: 2x coffee grams in ml, but cap at 30% of total water
+        var bloomWater = recipe.coffeeGrams * 2;
+        if (bloomWater > recipe.totalBaseWater * 0.3) {
+            bloomWater = Math.round(recipe.totalBaseWater * 0.3);
+        }
+        var restWater = recipe.totalBaseWater - bloomWater;
+
+        // 1. Boil water
         steps.push('Zagotuj wodę i odstaw na ok. 1 minutę (do ' + recipe.temperature + '°C)');
-        steps.push('Odmierz ' + recipe.coffeeGrams + ' g kawy grubo mielonej');
-        steps.push('Wsyp kawę do French Pressa');
-        steps.push('Zalej ' + recipe.totalBaseWater + ' ml gorącej wody');
-        steps.push('Zamieszaj delikatnie');
 
+        // 2. Measure coffee (+ heat milk if needed)
         if (needsMilk) {
             steps.push(
-                'Załóż tłok (nie wciskaj) i odczekaj ' + recipe.brewTime +
-                ' min — w tym czasie podgrzej ' + (recipe.totalMilk + recipe.totalFoam) +
-                ' ml mleka i spień je'
+                'Odmierz ' + recipe.coffeeGrams + ' g kawy grubo mielonej — ' +
+                'jednocześnie podgrzej ' + totalMilkMl + ' ml mleka do ok. 60°C (nie gotuj!)'
             );
         } else {
-            steps.push('Załóż tłok (nie wciskaj) i odczekaj ' + recipe.brewTime + ' min');
+            steps.push('Odmierz ' + recipe.coffeeGrams + ' g kawy grubo mielonej');
         }
 
+        // 3. Add coffee
+        steps.push('Wsyp kawę do French Pressa');
+
+        // 4. Blooming
+        steps.push(
+            'Zalej ' + bloomWater + ' ml wody i odczekaj 30 sek — to blooming, ' +
+            'uwalnia CO\u2082 z kawy i poprawia ekstrakcję'
+        );
+
+        // 5. Rest of water
+        steps.push('Dolej pozostałe ' + restWater + ' ml wody');
+
+        // 6. Stir
+        steps.push('Zamieszaj delikatnie');
+
+        // 7. Brew
+        steps.push('Załóż tłok (nie wciskaj) i odczekaj ' + recipe.brewTime + ' min');
+
+        // 8. Press
         steps.push('Powoli wciśnij tłok do dna');
 
-        // Per-cup distribution
-        if (state.cupCount === 1) {
-            var cup = recipe.cups[0];
-            if (cup.type === 'czarna') {
-                steps.push('Przelej kawę do filiżanki');
-            } else if (cup.type === 'americano') {
-                steps.push(
-                    'Przelej ' + cup.baseMl + ' ml kawy do filiżanki i dolej ' +
-                    cup.waterMl + ' ml gorącej wody'
-                );
+        // 9+. Distribution
+        if (!needsMilk) {
+            // No milk — pour directly
+            if (state.cupCount === 1) {
+                var cup = recipe.cups[0];
+                if (cup.type === 'czarna') {
+                    steps.push('Przelej kawę do filiżanki');
+                } else {
+                    steps.push(
+                        'Przelej ' + cup.baseMl + ' ml kawy do filiżanki i dolej ' +
+                        cup.waterMl + ' ml gorącej wody'
+                    );
+                }
             } else {
-                var desc = 'Przelej ' + cup.baseMl + ' ml kawy do filiżanki';
-                if (cup.milkMl > 0) desc += ', dodaj ' + cup.milkMl + ' ml spieninego mleka';
-                if (cup.foamMl > 0) desc += ' i nałóż ' + cup.foamMl + ' ml pianki';
-                steps.push(desc);
+                for (var i = 0; i < recipe.cups.length; i++) {
+                    var c = recipe.cups[i];
+                    var line = 'Filiżanka ' + c.index + ' (' + c.typeLabel + '): przelej ' + c.baseMl + ' ml bazy';
+                    if (c.waterMl > 0) line += ' + dolej ' + c.waterMl + ' ml gorącej wody';
+                    steps.push(line);
+                }
             }
         } else {
-            for (var i = 0; i < recipe.cups.length; i++) {
-                var c = recipe.cups[i];
-                var line = 'Filiżanka ' + c.index + ' (' + c.typeLabel + '): przelej ' + c.baseMl + ' ml bazy';
-                if (c.milkMl > 0) line += ' + ' + c.milkMl + ' ml mleka';
-                if (c.foamMl > 0) line += ' + ' + c.foamMl + ' ml pianki';
-                if (c.waterMl > 0) line += ' + ' + c.waterMl + ' ml gorącej wody';
-                steps.push(line);
+            // Milk needed — pour coffee out, then froth milk in the press
+
+            // Pour base into cups
+            if (state.cupCount === 1) {
+                var cup = recipe.cups[0];
+                steps.push('Przelej ' + cup.baseMl + ' ml kawy do filiżanki');
+            } else {
+                var pourParts = [];
+                for (var i = 0; i < recipe.cups.length; i++) {
+                    var c = recipe.cups[i];
+                    var part = 'fil. ' + c.index + ': ' + c.baseMl + ' ml';
+                    if (c.waterMl > 0) part += ' + ' + c.waterMl + ' ml wody';
+                    pourParts.push(part);
+                }
+                steps.push('Rozlej bazę kawy do filiżanek — ' + pourParts.join(', '));
+            }
+
+            // Froth milk in French Press
+            steps.push(
+                'Przelej podgrzane mleko do French Pressa (max do połowy) ' +
+                'i energicznie pompuj tłokiem przez 10–15 sek, aż mleko podwoi objętość'
+            );
+
+            // Add frothed milk to cups
+            if (state.cupCount === 1) {
+                var cup = recipe.cups[0];
+                var milkLine = 'Dodaj do filiżanki';
+                if (cup.milkMl > 0) milkLine += ' ' + cup.milkMl + ' ml spieninego mleka';
+                if (cup.foamMl > 0) milkLine += (cup.milkMl > 0 ? ' i ' : ' ') + cup.foamMl + ' ml pianki';
+                steps.push(milkLine);
+            } else {
+                for (var i = 0; i < recipe.cups.length; i++) {
+                    var c = recipe.cups[i];
+                    if (c.milkMl > 0 || c.foamMl > 0) {
+                        var line = 'Filiżanka ' + c.index + ' (' + c.typeLabel + '): dodaj';
+                        if (c.milkMl > 0) line += ' ' + c.milkMl + ' ml mleka';
+                        if (c.foamMl > 0) line += (c.milkMl > 0 ? ' i ' : ' ') + c.foamMl + ' ml pianki';
+                        steps.push(line);
+                    }
+                }
             }
         }
 
@@ -521,6 +584,70 @@
 
             el.appendChild(li);
         }
+    }
+
+    // ========================
+    // INFO TIPS
+    // ========================
+
+    function renderTips(recipe) {
+        var el = document.getElementById('recipe-tips');
+        var needsMilk = (recipe.totalMilk + recipe.totalFoam) > 0;
+
+        var tips = [
+            {
+                cls: 'bloom',
+                icon: '🫧',
+                title: 'Blooming',
+                text: 'Zalewanie kawy niewielką ilością wody uwalnia CO\u2082 uwięziony ' +
+                      'podczas palenia ziaren. Jeśli widzisz bąbelki na powierzchni — Twoja ' +
+                      'kawa jest świeża! Blooming poprawia ekstrakcję i daje pełniejszy smak.'
+            },
+            {
+                cls: 'temp',
+                icon: '🌡️',
+                title: 'Temperatura',
+                text: 'Optymalna temperatura parzenia to 93–96°C. Wrzatek parzy kawę ' +
+                      'zbyt intensywnie (gorzki smak), a za zimna woda da słabą, ' +
+                      'kwaśną ekstrakcję. Wystarczy odczekać ok. 1 min po zagotowaniu.'
+            }
+        ];
+
+        if (needsMilk) {
+            tips.push({
+                cls: 'milk',
+                icon: '🥛',
+                title: 'Spienianie mleka',
+                text: 'French Press świetnie sprawdza się jako spieniacz! Podgrzej mleko ' +
+                      'do ok. 60°C (nie gotuj — powyżej 70°C białka się rozpadają), ' +
+                      'przelej do prasy max do połowy i energicznie pompuj tłokiem. ' +
+                      'Mleko podwoi objętość w 10–15 sekund.'
+            });
+        }
+
+        tips.push({
+            cls: 'grind',
+            icon: '⚙️',
+            title: 'Stopień mielenia',
+            text: 'Do French Pressa używaj grubo mielonej kawy (jak gruby piasek). ' +
+                  'Zbyt drobne mielenie sprawi, że kawa przejdzie przez filtr siatkowy ' +
+                  'i napój będzie mętny i przeparzony.'
+        });
+
+        var html = '<h3>Dobre praktyki</h3>';
+        for (var i = 0; i < tips.length; i++) {
+            var t = tips[i];
+            html +=
+                '<div class="info-bar ' + t.cls + '">' +
+                    '<span class="info-bar-icon">' + t.icon + '</span>' +
+                    '<div class="info-bar-body">' +
+                        '<span class="info-bar-title">' + t.title + '</span>' +
+                        t.text +
+                    '</div>' +
+                '</div>';
+        }
+
+        el.innerHTML = html;
     }
 
     // ========================
