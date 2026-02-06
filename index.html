@@ -3,79 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kawusiomat - French Press</title>
+    <title>Kawusiomat</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>☕ Kawusiomat</h1>
-            <p class="subtitle">Asystent parzenia kawy we French Pressie</p>
+            <p class="subtitle">Stwórz idealną kawę krok po kroku</p>
         </header>
 
+        <!-- Progress -->
+        <div class="wizard-progress" id="wizard-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-dots">
+                <div class="progress-dot current" data-step="1">
+                    <span class="dot-number">1</span>
+                    <span class="dot-label">Ilość</span>
+                </div>
+                <div class="progress-dot" data-step="2">
+                    <span class="dot-number">2</span>
+                    <span class="dot-label">Rozmiar</span>
+                </div>
+                <div class="progress-dot" data-step="3">
+                    <span class="dot-number">3</span>
+                    <span class="dot-label">Rodzaj</span>
+                </div>
+                <div class="progress-dot" data-step="4">
+                    <span class="dot-number">4</span>
+                    <span class="dot-label">Moc</span>
+                </div>
+            </div>
+        </div>
+
         <main>
-            <section class="card" id="form-section">
-                <h2>Dobierz parametry</h2>
-
-                <div class="form-group">
-                    <label>Pojemność filiżanki</label>
-                    <div class="button-group" id="cup-size-group">
-                        <button type="button" data-value="150">150 ml</button>
-                        <button type="button" data-value="200">200 ml</button>
-                        <button type="button" data-value="250" class="active">250 ml</button>
-                        <button type="button" data-value="300">300 ml</button>
-                        <button type="button" data-value="350">350 ml</button>
-                    </div>
+            <!-- STEP 1: Cup count -->
+            <section class="card" id="step-1">
+                <h2>Ile filiżanek?</h2>
+                <div class="button-group" id="cup-count-group">
+                    <button type="button" data-value="1" class="active">1</button>
+                    <button type="button" data-value="2">2</button>
+                    <button type="button" data-value="3">3</button>
+                    <button type="button" data-value="4">4</button>
+                    <button type="button" data-value="5">5</button>
+                    <button type="button" data-value="6">6</button>
                 </div>
-
-                <div class="form-group">
-                    <label>Liczba kaw</label>
-                    <div class="button-group" id="cup-count-group">
-                        <button type="button" data-value="1" class="active">1</button>
-                        <button type="button" data-value="2">2</button>
-                        <button type="button" data-value="3">3</button>
-                        <button type="button" data-value="4">4</button>
-                        <button type="button" data-value="5">5</button>
-                        <button type="button" data-value="6">6</button>
-                    </div>
+                <div class="step-nav">
+                    <div></div>
+                    <button type="button" class="btn-next" id="next-1">Dalej →</button>
                 </div>
-
-                <div class="form-group">
-                    <label>Rodzaj kawy</label>
-                    <div class="button-group coffee-type" id="coffee-type-group">
-                        <button type="button" data-value="classic" class="active">
-                            <span class="type-icon">☕</span>
-                            <span class="type-name">Klasyczna</span>
-                            <span class="type-ratio">1:15</span>
-                        </button>
-                        <button type="button" data-value="strong">
-                            <span class="type-icon">💪</span>
-                            <span class="type-name">Mocna</span>
-                            <span class="type-ratio">1:12</span>
-                        </button>
-                        <button type="button" data-value="mild">
-                            <span class="type-icon">🌿</span>
-                            <span class="type-name">Łagodna</span>
-                            <span class="type-ratio">1:18</span>
-                        </button>
-                    </div>
-                </div>
-
-                <button type="button" class="btn-brew" id="brew-btn">
-                    Przygotuj przepis ☕
-                </button>
             </section>
 
-            <section class="card hidden" id="recipe-section">
-                <h2>Twój przepis</h2>
+            <!-- STEP 2: Cup sizes -->
+            <section class="card hidden" id="step-2">
+                <h2>Pojemność filiżanek</h2>
+                <div id="cup-sizes-container"></div>
+                <div class="step-nav">
+                    <button type="button" class="btn-back-step" id="back-2">← Wróć</button>
+                    <button type="button" class="btn-next" id="next-2">Dalej →</button>
+                </div>
+            </section>
 
+            <!-- STEP 3: Coffee types -->
+            <section class="card hidden" id="step-3">
+                <h2>Jaka kawa do której filiżanki?</h2>
+                <div id="cup-types-container"></div>
+                <div class="step-nav">
+                    <button type="button" class="btn-back-step" id="back-3">← Wróć</button>
+                    <button type="button" class="btn-next" id="next-3">Dalej →</button>
+                </div>
+            </section>
+
+            <!-- STEP 4: Strength -->
+            <section class="card hidden" id="step-4">
+                <h2>Moc kawy</h2>
+                <div class="button-group coffee-type" id="strength-group">
+                    <button type="button" data-value="weak">
+                        <span class="type-icon">🌿</span>
+                        <span class="type-name">Słaba</span>
+                        <span class="type-ratio">lekka</span>
+                    </button>
+                    <button type="button" data-value="medium" class="active">
+                        <span class="type-icon">☕</span>
+                        <span class="type-name">Średnia</span>
+                        <span class="type-ratio">klasyczna</span>
+                    </button>
+                    <button type="button" data-value="strong">
+                        <span class="type-icon">💪</span>
+                        <span class="type-name">Mocna</span>
+                        <span class="type-ratio">intensywna</span>
+                    </button>
+                </div>
+                <div class="step-nav">
+                    <button type="button" class="btn-back-step" id="back-4">← Wróć</button>
+                    <button type="button" class="btn-brew" id="brew-btn">Przygotuj przepis ☕</button>
+                </div>
+            </section>
+
+            <!-- RECIPE -->
+            <section class="card hidden" id="recipe-section">
+                <h2>Baza kawy (French Press)</h2>
                 <div class="recipe-summary" id="recipe-summary"></div>
+
+                <div class="breakdown-section hidden" id="recipe-breakdown">
+                    <h3>Podział na filiżanki</h3>
+                    <div class="breakdown-content"></div>
+                </div>
 
                 <h3>Kroki</h3>
                 <ol class="steps-list" id="steps-list"></ol>
 
                 <button type="button" class="btn-back" id="back-btn">
-                    ← Zmień parametry
+                    ← Od nowa
                 </button>
             </section>
         </main>

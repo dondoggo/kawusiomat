@@ -39,7 +39,7 @@ h1, h2, h3 {
 
 header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 header h1 {
@@ -51,6 +51,80 @@ header h1 {
     color: var(--accent-light);
     font-size: 0.95rem;
     margin-top: 0.25rem;
+}
+
+/* Wizard Progress */
+
+.wizard-progress {
+    margin-bottom: 1.5rem;
+}
+
+.progress-bar {
+    height: 4px;
+    background: #e8ddd3;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    width: 25%;
+}
+
+.progress-dots {
+    display: flex;
+    justify-content: space-between;
+}
+
+.progress-dot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    opacity: 0.35;
+    transition: all 0.3s ease;
+}
+
+.progress-dot.current {
+    opacity: 1;
+}
+
+.progress-dot.done {
+    opacity: 0.7;
+}
+
+.dot-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e8ddd3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    transition: all 0.3s ease;
+}
+
+.progress-dot.current .dot-number {
+    background: var(--accent);
+    color: var(--white);
+}
+
+.progress-dot.done .dot-number {
+    background: var(--done);
+    color: var(--white);
+}
+
+.dot-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent);
 }
 
 /* Card */
@@ -95,7 +169,7 @@ header h1 {
 
 .button-group button {
     flex: 1;
-    min-width: 60px;
+    min-width: 55px;
     padding: 0.5rem 0.75rem;
     border: 2px solid var(--accent-light);
     border-radius: 8px;
@@ -133,40 +207,64 @@ header h1 {
 
 .type-name {
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .type-ratio {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     opacity: 0.7;
 }
 
-/* Brew button */
+/* Step navigation */
 
+.step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.25rem;
+    gap: 0.75rem;
+}
+
+.btn-next,
 .btn-brew {
-    display: block;
-    width: 100%;
-    padding: 0.85rem;
-    margin-top: 0.5rem;
+    padding: 0.7rem 1.5rem;
     background: var(--accent);
     color: var(--white);
     border: none;
     border-radius: 10px;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s ease, transform 0.1s ease;
 }
 
+.btn-next:hover,
 .btn-brew:hover {
     background: #5d3f2c;
 }
 
+.btn-next:active,
 .btn-brew:active {
     transform: scale(0.98);
 }
 
-/* Back button */
+.btn-back-step {
+    padding: 0.7rem 1.25rem;
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent-light);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-back-step:hover {
+    border-color: var(--accent);
+    background: #faf6f2;
+}
+
+/* Back button (recipe) */
 
 .btn-back {
     display: block;
@@ -185,6 +283,25 @@ header h1 {
 .btn-back:hover {
     border-color: var(--accent);
     background: #faf6f2;
+}
+
+/* Cup config cards */
+
+.cup-config {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.cup-config:last-child {
+    margin-bottom: 0;
+}
+
+.cup-config h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
 }
 
 /* Recipe summary */
@@ -215,6 +332,73 @@ header h1 {
     color: var(--accent-light);
     margin-top: 0.15rem;
     display: block;
+}
+
+/* Breakdown section */
+
+.breakdown-section {
+    margin-bottom: 1.5rem;
+}
+
+.breakdown-section h3 {
+    margin-bottom: 0.75rem;
+}
+
+.cup-breakdown {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.cup-breakdown:last-child {
+    margin-bottom: 0;
+}
+
+.cup-breakdown-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.cup-num {
+    font-size: 1.1rem;
+}
+
+.cup-breakdown-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.detail-chip {
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.detail-chip.base {
+    background: #e8d5c4;
+    color: #5d3f2c;
+}
+
+.detail-chip.milk {
+    background: #f0e6d8;
+    color: #7a6248;
+}
+
+.detail-chip.foam {
+    background: #fdf5e6;
+    color: #8a7a5a;
+}
+
+.detail-chip.water {
+    background: #dce8f0;
+    color: #3a5a7a;
 }
 
 /* Steps */
@@ -277,7 +461,7 @@ header h1 {
 }
 
 .steps-list li.done .step-checkbox::before {
-    content: "✓";
+    content: "\2713";
     color: var(--white);
 }
 
@@ -313,17 +497,33 @@ footer {
     }
 
     .button-group button {
-        min-width: 50px;
-        padding: 0.45rem 0.5rem;
-        font-size: 0.85rem;
+        min-width: 48px;
+        padding: 0.45rem 0.4rem;
+        font-size: 0.82rem;
     }
 
     .coffee-type button {
         padding: 0.5rem 0.3rem;
+        min-width: 60px;
+    }
+
+    .type-name {
+        font-size: 0.7rem;
     }
 
     .recipe-summary {
         grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
+    }
+
+    .step-nav {
+        flex-direction: column;
+    }
+
+    .btn-next,
+    .btn-brew,
+    .btn-back-step {
+        width: 100%;
+        text-align: center;
     }
 }
