@@ -735,7 +735,7 @@
         timerEls.ring.style.strokeDasharray = RING_CIRCUMFERENCE;
         timerEls.ring.style.strokeDashoffset = RING_CIRCUMFERENCE - offset;
 
-        timerEls.ring.className = 'timer-ring-progress';
+        timerEls.ring.setAttribute('class', 'timer-ring-progress');
         if (timer.phase === 'bloom') {
             timerEls.phase.textContent = 'Blooming';
             timerEls.ring.classList.add('blooming');
