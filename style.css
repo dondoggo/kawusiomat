@@ -533,6 +533,397 @@ header h1 {
     border-left-color: var(--accent-light);
 }
 
+/* Timer */
+
+.timer-section {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.timer-section h3 {
+    color: var(--accent);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.timer-display {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.timer-ring-wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+}
+
+.timer-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-ring-bg {
+    fill: none;
+    stroke: #e8ddd3;
+    stroke-width: 6;
+}
+
+.timer-ring-progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 339.292;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+}
+
+.timer-ring-progress.blooming {
+    stroke: #d4a24e;
+}
+
+.timer-ring-progress.brewing {
+    stroke: var(--accent);
+}
+
+.timer-ring-progress.done {
+    stroke: var(--done);
+}
+
+.timer-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-phase {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.timer-time {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.timer-btn {
+    padding: 0.6rem 1.8rem;
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.timer-btn:hover {
+    background: #5d3f2c;
+}
+
+.timer-btn:active {
+    transform: scale(0.97);
+}
+
+.timer-btn-secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent-light);
+}
+
+.timer-btn-secondary:hover {
+    background: #faf6f2;
+    border-color: var(--accent);
+}
+
+.timer-phases {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.timer-phase-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-light);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.timer-phase-indicator.active {
+    opacity: 1;
+    color: var(--accent);
+}
+
+.timer-phase-indicator.completed {
+    opacity: 0.7;
+    color: var(--done);
+}
+
+.phase-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    transition: all 0.3s ease;
+}
+
+.timer-phase-indicator.active .phase-dot {
+    background: var(--accent);
+}
+
+.timer-phase-indicator.completed .phase-dot {
+    background: var(--done);
+}
+
+.timer-phase-connector {
+    width: 30px;
+    height: 2px;
+    background: #e8ddd3;
+}
+
+@keyframes timer-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+
+.timer-ring-wrap.pulsing {
+    animation: timer-pulse 0.6s ease 3;
+}
+
+/* ========================
+   ANIMATIONS
+   ======================== */
+
+/* Card entrance — fade + slide up */
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-enter {
+    animation: fadeSlideIn 0.35s ease-out both;
+}
+
+/* Button pop on active selection */
+@keyframes btnPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+.button-group button.pop {
+    animation: btnPop 0.25s ease-out;
+}
+
+/* Progress dot bounce when becoming current */
+@keyframes dotBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    70% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.progress-dot.bounce .dot-number {
+    animation: dotBounce 0.4s ease-out;
+}
+
+/* Staggered fade-in for recipe children */
+@keyframes staggerIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stagger-item {
+    opacity: 0;
+    animation: staggerIn 0.3s ease-out both;
+}
+
+/* Summary items pop in */
+@keyframes summaryPop {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.summary-item {
+    transition: transform 0.2s ease;
+}
+
+.summary-pop .summary-item {
+    opacity: 0;
+    animation: summaryPop 0.3s ease-out both;
+}
+
+/* Step checkbox bounce on done */
+@keyframes checkBounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.2); }
+    60% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.steps-list li.check-anim .step-checkbox {
+    animation: checkBounce 0.35s ease-out;
+}
+
+/* Coffee cup pouring animation */
+@keyframes pourStream {
+    0% { height: 0; opacity: 0; }
+    10% { opacity: 1; }
+    60% { height: 24px; opacity: 1; }
+    100% { height: 24px; opacity: 0; }
+}
+
+@keyframes cupFill {
+    0% { height: 0; }
+    40% { height: 0; }
+    100% { height: 16px; }
+}
+
+@keyframes steamFloat {
+    0% { opacity: 0; transform: translateY(0) scaleX(1); }
+    30% { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-14px) scaleX(1.4); }
+}
+
+.brew-animation {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    height: 76px;
+    align-items: flex-end;
+}
+
+.brew-cup {
+    position: relative;
+    width: 48px;
+    height: 36px;
+    border: 3px solid var(--accent);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+}
+
+.brew-cup-handle {
+    position: absolute;
+    right: -14px;
+    top: 4px;
+    width: 12px;
+    height: 16px;
+    border: 3px solid var(--accent);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+}
+
+.brew-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 2px;
+    right: 2px;
+    background: linear-gradient(to top, #5d3f2c, var(--accent));
+    border-radius: 0 0 7px 7px;
+    height: 0;
+    animation: cupFill 1.2s ease-out 0.2s both;
+}
+
+.brew-pour {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: pourStream 1s ease-out both;
+}
+
+.brew-steam {
+    position: absolute;
+    top: -8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(200, 168, 130, 0.35);
+}
+
+.brew-steam:nth-of-type(1) {
+    left: 6px;
+    animation: steamFloat 1.2s ease-out 1.1s both;
+}
+
+.brew-steam:nth-of-type(2) {
+    left: 18px;
+    animation: steamFloat 1.2s ease-out 1.3s both;
+}
+
+.brew-steam:nth-of-type(3) {
+    left: 30px;
+    animation: steamFloat 1.2s ease-out 1.5s both;
+}
+
+/* Cup config stagger */
+.cup-config {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cup-config-enter {
+    opacity: 0;
+    animation: fadeSlideIn 0.3s ease-out both;
+}
+
+/* Info bar slide in */
+.info-bar-enter {
+    opacity: 0;
+    animation: fadeSlideIn 0.35s ease-out both;
+}
+
 /* Hidden */
 
 .hidden {

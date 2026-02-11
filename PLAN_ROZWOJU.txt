@@ -1,0 +1,201 @@
+================================================================================
+  KAWUSIOMAT - PLAN ROZWOJU, UTRZYMANIA I DOKUMENTACJA
+================================================================================
+
+Data utworzenia: 2026-02-12
+Wersja aplikacji: 1.1
+Stack: HTML + CSS + vanilla JavaScript ES6+ (bez frameworkow)
+Linter: ESLint 10 (eslint.config.mjs)
+Hosting: GitHub Pages (static.yml)
+
+================================================================================
+  1. OPIS APLIKACJI
+================================================================================
+
+Kawusiomat to kreator przepisow do kawy z French Pressa.
+Uzytkownik przechodzi przez 4-krokowy wizard:
+
+  Krok 1 — Liczba filizanek (1-6)
+  Krok 2 — Pojemnosc kazdej filizanki (150-350 ml)
+  Krok 3 — Rodzaj kawy (czarna, americano, cappuccino, flat white, latte)
+  Krok 4 — Moc kawy (slaba, srednia, mocna)
+
+Wynik: szczegolowy przepis z krokami, proporcjami, bloomingiem,
+spienianiem mleka i poradami.
+
+================================================================================
+  2. STRUKTURA PLIKOW
+================================================================================
+
+  kawusiomat/
+  ├── index.html          Glowny plik HTML (wizard + recipe + timer)
+  ├── style.css           Style (responsywne, mobile-first)
+  ├── app.js              Logika aplikacji (ES6+ IIFE, bez zaleznosci)
+  ├── eslint.config.mjs   Konfiguracja ESLint (flat config)
+  ├── package.json        npm — devDependencies: eslint
+  ├── .github/
+  │   └── workflows/
+  │       └── static.yml  Deploy na GitHub Pages
+  └── PLAN_ROZWOJU.txt    Ten plik
+
+================================================================================
+  3. PLAN ROZWOJU — NOWE FUNKCJONALNOSCI
+================================================================================
+
+--- PRIORYTET WYSOKI ---
+
+[x] Timer parzenia (zrealizowano 2026-02-12)
+    - Odliczanie czasu parzenia po wygenerowaniu przepisu
+    - Dzwiek (Web Audio API) i wibracja po zakonczeniu kazdej fazy
+    - Osobny timer na blooming (30 sek) i glowne parzenie
+    - Kolowy SVG ring z postepem, start/pauza/reset, animacja pulsowania
+
+[ ] Zapisywanie ulubionych przepisow (localStorage)
+    - Przycisk "Zapisz przepis" na ekranie wyniku
+    - Lista zapisanych przepisow dostepna z ekranu glownego
+    - Mozliwosc usuwania zapisanych przepisow
+
+[ ] Tryb offline (PWA)
+    - Manifest.json + Service Worker
+    - Mozliwosc instalacji na telefonie
+    - Pelna funkcjonalnosc bez internetu
+
+--- PRIORYTET SREDNI ---
+
+[ ] Wiecej metod parzenia
+    - Drip/przelewowy (V60, Chemex)
+    - Aeropress
+    - Kawiarka (Moka pot)
+    - Kazda metoda z wlasnym zestawem krokow i proporcji
+
+[ ] Jednostki imperialne
+    - Przelacznik ml/oz i g/oz
+    - Temperatura w Fahrenheitach
+    - Zapamietywanie preferencji
+
+[ ] Tryb ciemny
+    - Przelacznik jasny/ciemny
+    - Respektowanie preferencji systemowych (prefers-color-scheme)
+    - Zapisanie wyboru w localStorage
+
+[ ] Udostepnianie przepisu
+    - Przycisk "Udostepnij" generujacy link z parametrami w URL
+    - Kopiowanie przepisu jako tekst do schowka
+    - Opcjonalnie: Web Share API na urzadzeniach mobilnych
+
+--- PRIORYTET NISKI ---
+
+[ ] Wielojezycznosc (i18n)
+    - Polski (domyslny), angielski
+    - Slownik poza kodem (obiekt/JSON)
+    - Przelacznik jezyka w naglowku
+
+[ ] Historia parzen
+    - Automatyczne logowanie kazdego wygenerowanego przepisu
+    - Statystyki: ile kaw zaparzono, ulubiony rodzaj, srednia moc
+
+[x] Animacje i mikrointerakcje (zrealizowano 2026-02-12)
+    - Animacja parzenia kawy (pour + fill + steam) na ekranie przepisu
+    - Plynne przejscia miedzy krokami wizarda (fade + slide up)
+    - Bounce na progress dots przy zmianie kroku
+    - Pop na przyciskach przy zaznaczeniu (button-group)
+    - Staggerowane wejscie: summary items, cup configs, steps, info bars
+    - Bounce na checkboxie krokow przy zaznaczeniu "done"
+
+[ ] Kalkulator kosztow
+    - Cena za kg kawy i litr mleka
+    - Obliczanie kosztu jednej filizanki
+    - Porownanie z kawiarnia
+
+================================================================================
+  4. PLAN UTRZYMANIA
+================================================================================
+
+--- JAKOSC KODU ---
+
+[x] Migracja na ES6+ (zrealizowano 2026-02-12)
+    - var → const/let, function → arrow, konkatenacja → template literals
+    - for+var IIFE → for+let (block scope eliminuje bledy closure)
+    - for...of, .forEach(), .some(), .map(), shorthand properties
+
+[x] Linter (ESLint) (zrealizowano 2026-02-12)
+    - Flat config: eslint.config.mjs (ESLint 10)
+    - Reguly: no-var, prefer-const, prefer-template, eqeqeq, no-eval
+    - Skrypty npm: "npm run lint" / "npm run lint:fix"
+    - 0 errors, 0 warnings na aktualnym kodzie
+
+[ ] Formatter (Prettier)
+    - Spojny styl kodu
+    - Konfiguracja .prettierrc
+
+[ ] Testy
+    - Testy jednostkowe logiki (calculateRecipe, generateSteps)
+    - Framework: Vitest lub Jest
+    - Testy E2E: Playwright lub Cypress (przejscie przez wizard)
+
+--- CI/CD ---
+
+[ ] GitHub Actions
+    - Lint przy kazdym PUSH i PR
+    - Testy automatyczne
+    - Deploy na GitHub Pages (juz istnieje: static.yml)
+
+[ ] Wersjonowanie
+    - Semantic versioning (MAJOR.MINOR.PATCH)
+    - Changelog (CHANGELOG.md) przy wiekszych zmianach
+    - Git tags dla wersji
+
+--- WYDAJNOSC ---
+
+[ ] Minifikacja CSS i JS (np. esbuild, terser)
+[ ] Kompresja obrazkow jesli zostana dodane
+[ ] Audit Lighthouse — cel: 100/100 we wszystkich kategoriach
+
+--- DOSTEPNOSC (a11y) ---
+
+[ ] Atrybuty ARIA dla przyciskow-radio (role="radiogroup", aria-checked)
+[ ] Obsluga klawiatury (nawigacja Tab + Enter/Space)
+[ ] Kontrasty kolorow zgodne z WCAG 2.1 AA
+[ ] Skip-to-content link
+[ ] Label dla kazdej grupy przyciskow
+
+--- BEZPIECZENSTWO ---
+
+[ ] Content Security Policy (meta tag lub header)
+[ ] Subresource Integrity jesli dodane zostana zewnetrzne zasoby
+[ ] Regularne aktualizacje zaleznosci (jesli zostana dodane)
+
+================================================================================
+  5. ZNANE BLEDY — NAPRAWIONE
+================================================================================
+
+[x] Mozliwosc zaznaczenia wielu rozmiarow w jednej filizance
+    - Przyczyna: closure w petli for+var lapalo zmienna 'group'
+      przez referencje — po petli wskazywala na ostatnia grupe
+    - Naprawiono: przekazanie 'group' jako parametr IIFE (pozniej migracja
+      na ES6+ let/const calkowicie wyeliminowala te klase bledow)
+    - Dotyczylo: renderCupSizes() i renderCupTypes()
+    - Data naprawy: 2026-02-12
+
+================================================================================
+  6. KONWENCJE PROJEKTU
+================================================================================
+
+- Jezyk interfejsu: polski
+- Nazwy zmiennych i komentarzy w kodzie: angielski
+- ES6+ (const/let, arrow functions, template literals, for...of)
+- Jedna devDependency: eslint (brak runtime dependencies)
+- Pojedynczy plik JS w IIFE (brak modulow — celowa prostota)
+- Mobile-first, responsywny CSS
+- Brak build stepu — pliki serwowane bezposrednio
+- Lint: npm run lint (0 errors wymagane przed commitem)
+
+================================================================================
+  7. KONTAKTY I ZASOBY
+================================================================================
+
+Repozytorium: GitHub (branch: main)
+Deploy: GitHub Pages (automatyczny przez static.yml)
+Issue tracker: GitHub Issues
+
+================================================================================

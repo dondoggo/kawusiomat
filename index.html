@@ -112,6 +112,38 @@
                     <div class="breakdown-content"></div>
                 </div>
 
+                <!-- Timer -->
+                <div class="timer-section" id="timer-section">
+                    <h3>Timer parzenia</h3>
+                    <div class="timer-display">
+                        <div class="timer-ring-wrap">
+                            <svg class="timer-ring" viewBox="0 0 120 120">
+                                <circle class="timer-ring-bg" cx="60" cy="60" r="54" />
+                                <circle class="timer-ring-progress" id="timer-ring-progress" cx="60" cy="60" r="54" />
+                            </svg>
+                            <div class="timer-inner">
+                                <span class="timer-phase" id="timer-phase">Blooming</span>
+                                <span class="timer-time" id="timer-time">0:30</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timer-controls">
+                        <button type="button" class="timer-btn" id="timer-start">Start</button>
+                        <button type="button" class="timer-btn timer-btn-secondary" id="timer-reset">Od nowa</button>
+                    </div>
+                    <div class="timer-phases" id="timer-phases">
+                        <div class="timer-phase-indicator active" id="phase-bloom">
+                            <span class="phase-dot"></span>
+                            <span>Blooming</span>
+                        </div>
+                        <div class="timer-phase-connector"></div>
+                        <div class="timer-phase-indicator" id="phase-brew">
+                            <span class="phase-dot"></span>
+                            <span>Parzenie</span>
+                        </div>
+                    </div>
+                </div>
+
                 <h3>Kroki</h3>
                 <ol class="steps-list" id="steps-list"></ol>
 

@@ -4,7 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint app.js",
+    "lint:fix": "eslint app.js --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "private": true
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dondoggo/kawusiomat.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dondoggo/kawusiomat/issues"
+  },
+  "homepage": "https://github.com/dondoggo/kawusiomat#readme",
+  "devDependencies": {
+    "eslint": "^10.0.0"
+  }
 }

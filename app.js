@@ -1,11 +1,11 @@
-(function () {
+(() => {
     'use strict';
 
     // ========================
     // CONFIG
     // ========================
 
-    var COFFEE_TYPES = {
+    const COFFEE_TYPES = {
         czarna: {
             label: 'Czarna',
             icon: '☕',
@@ -48,19 +48,19 @@
         }
     };
 
-    var STRENGTHS = {
+    const STRENGTHS = {
         weak:   { label: 'Słaba',   ratio: 16, brewTime: 3 },
         medium: { label: 'Średnia', ratio: 14, brewTime: 4 },
         strong: { label: 'Mocna',   ratio: 12, brewTime: 5 }
     };
 
-    var CUP_SIZES = [150, 200, 250, 300, 350];
+    const CUP_SIZES = [150, 200, 250, 300, 350];
 
     // ========================
     // STATE
     // ========================
 
-    var state = {
+    const state = {
         currentStep: 1,
         cupCount: 1,
         cups: [{ size: 250, type: 'czarna' }],
@@ -71,81 +71,113 @@
     // DOM REFS
     // ========================
 
-    var stepSections = {};
-    for (var i = 1; i <= 4; i++) {
-        stepSections[i] = document.getElementById('step-' + i);
+    const stepSections = {};
+    for (let i = 1; i <= 4; i++) {
+        stepSections[i] = document.getElementById(`step-${i}`);
     }
-    var recipeSection = document.getElementById('recipe-section');
-    var progressFill = document.getElementById('progress-fill');
-    var progressDots = document.querySelectorAll('.progress-dot');
-    var wizardProgress = document.getElementById('wizard-progress');
+    const recipeSection = document.getElementById('recipe-section');
+    const progressFill = document.getElementById('progress-fill');
+    const progressDots = document.querySelectorAll('.progress-dot');
+    const wizardProgress = document.getElementById('wizard-progress');
 
     // ========================
     // PROGRESS BAR
     // ========================
 
-    function updateProgress(step, total) {
-        var pct = (step / total) * 100;
-        progressFill.style.width = pct + '%';
+    const updateProgress = (step, total) => {
+        const pct = (step / total) * 100;
+        progressFill.style.width = `${pct}%`;
 
-        for (var d = 0; d < progressDots.length; d++) {
-            var dotStep = d + 1;
+        progressDots.forEach((dot, d) => {
+            const dotStep = d + 1;
             if (dotStep < step) {
-                progressDots[d].className = 'progress-dot done';
+                dot.className = 'progress-dot done';
             } else if (dotStep === step) {
-                progressDots[d].className = 'progress-dot current';
+                dot.className = 'progress-dot current bounce';
             } else {
-                progressDots[d].className = 'progress-dot';
+                dot.className = 'progress-dot';
             }
-        }
-    }
+        });
+    };
 
     // ========================
     // NAVIGATION
     // ========================
 
-    function showStep(stepNum) {
+    const animateCard = (el) => {
+        el.classList.remove('card-enter');
+        void el.offsetWidth;
+        el.classList.add('card-enter');
+    };
+
+    const showStep = (stepNum) => {
         state.currentStep = stepNum;
-        for (var s = 1; s <= 4; s++) {
+        for (let s = 1; s <= 4; s++) {
             stepSections[s].classList.toggle('hidden', s !== stepNum);
         }
         recipeSection.classList.add('hidden');
         wizardProgress.classList.remove('hidden');
         updateProgress(stepNum, 4);
+        animateCard(stepSections[stepNum]);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    };
 
-    function showRecipe() {
-        for (var s = 1; s <= 4; s++) {
+    const showRecipe = () => {
+        for (let s = 1; s <= 4; s++) {
             stepSections[s].classList.add('hidden');
         }
         recipeSection.classList.remove('hidden');
         wizardProgress.classList.add('hidden');
+        animateCard(recipeSection);
+        animateRecipeChildren();
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    };
+
+    const animateRecipeChildren = () => {
+        const summary = document.getElementById('recipe-summary');
+        summary.classList.add('summary-pop');
+        summary.querySelectorAll('.summary-item').forEach((item, i) => {
+            item.style.animationDelay = `${i * 0.08}s`;
+        });
+
+        const staggerEls = recipeSection.querySelectorAll(
+            '.timer-section, .steps-list li, .info-bar, .cup-breakdown'
+        );
+        staggerEls.forEach((el, i) => {
+            el.classList.add('stagger-item');
+            el.style.animationDelay = `${0.15 + i * 0.05}s`;
+        });
+    };
 
     // ========================
     // HELPERS
     // ========================
 
-    function syncCups() {
+    const syncCups = () => {
         while (state.cups.length < state.cupCount) {
             state.cups.push({ size: 250, type: 'czarna' });
         }
         state.cups.length = state.cupCount;
-    }
+    };
 
-    function setupStaticGroup(groupEl, stateKey, parser) {
-        groupEl.addEventListener('click', function (e) {
-            var btn = e.target.closest('button');
+    const popButton = (btn) => {
+        btn.classList.remove('pop');
+        void btn.offsetWidth;
+        btn.classList.add('pop');
+    };
+
+    const setupStaticGroup = (groupEl, stateKey, parser) => {
+        groupEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
             if (!btn || !groupEl.contains(btn)) return;
-            groupEl.querySelectorAll('button').forEach(function (b) {
+            groupEl.querySelectorAll('button').forEach((b) => {
                 b.classList.remove('active');
             });
             btn.classList.add('active');
+            popButton(btn);
             state[stateKey] = parser ? parser(btn.dataset.value) : btn.dataset.value;
         });
-    }
+    };
 
     // ========================
     // STEP 1 — Cup count
@@ -154,10 +186,10 @@
     setupStaticGroup(
         document.getElementById('cup-count-group'),
         'cupCount',
-        function (v) { return parseInt(v, 10); }
+        (v) => parseInt(v, 10)
     );
 
-    document.getElementById('next-1').addEventListener('click', function () {
+    document.getElementById('next-1').addEventListener('click', () => {
         syncCups();
         renderCupSizes();
         showStep(2);
@@ -167,53 +199,54 @@
     // STEP 2 — Cup sizes
     // ========================
 
-    function renderCupSizes() {
-        var container = document.getElementById('cup-sizes-container');
+    const renderCupSizes = () => {
+        const container = document.getElementById('cup-sizes-container');
         container.innerHTML = '';
 
-        for (var c = 0; c < state.cupCount; c++) {
-            var card = document.createElement('div');
+        for (let c = 0; c < state.cupCount; c++) {
+            const card = document.createElement('div');
             card.className = 'cup-config';
 
-            var title = document.createElement('h3');
-            title.textContent = 'Filiżanka ' + (c + 1);
+            const title = document.createElement('h3');
+            title.textContent = `Filiżanka ${c + 1}`;
             card.appendChild(title);
 
-            var group = document.createElement('div');
+            const group = document.createElement('div');
             group.className = 'button-group';
 
-            for (var s = 0; s < CUP_SIZES.length; s++) {
-                var btn = document.createElement('button');
+            for (const size of CUP_SIZES) {
+                const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.dataset.value = CUP_SIZES[s];
-                btn.textContent = CUP_SIZES[s] + ' ml';
-                if (state.cups[c].size === CUP_SIZES[s]) {
+                btn.dataset.value = size;
+                btn.textContent = `${size} ml`;
+                if (state.cups[c].size === size) {
                     btn.classList.add('active');
                 }
                 group.appendChild(btn);
             }
 
-            (function (idx) {
-                group.addEventListener('click', function (e) {
-                    var b = e.target.closest('button');
-                    if (!b) return;
-                    group.querySelectorAll('button').forEach(function (x) {
-                        x.classList.remove('active');
-                    });
-                    b.classList.add('active');
-                    state.cups[idx].size = parseInt(b.dataset.value, 10);
+            group.addEventListener('click', (e) => {
+                const b = e.target.closest('button');
+                if (!b) return;
+                group.querySelectorAll('button').forEach((x) => {
+                    x.classList.remove('active');
                 });
-            })(c);
+                b.classList.add('active');
+                popButton(b);
+                state.cups[c].size = parseInt(b.dataset.value, 10);
+            });
 
             card.appendChild(group);
+            card.classList.add('cup-config-enter');
+            card.style.animationDelay = `${c * 0.08}s`;
             container.appendChild(card);
         }
-    }
+    };
 
-    document.getElementById('back-2').addEventListener('click', function () {
+    document.getElementById('back-2').addEventListener('click', () => {
         showStep(1);
     });
-    document.getElementById('next-2').addEventListener('click', function () {
+    document.getElementById('next-2').addEventListener('click', () => {
         renderCupTypes();
         showStep(3);
     });
@@ -222,59 +255,59 @@
     // STEP 3 — Coffee types
     // ========================
 
-    function renderCupTypes() {
-        var container = document.getElementById('cup-types-container');
+    const renderCupTypes = () => {
+        const container = document.getElementById('cup-types-container');
         container.innerHTML = '';
 
-        var typeKeys = Object.keys(COFFEE_TYPES);
+        const typeKeys = Object.keys(COFFEE_TYPES);
 
-        for (var c = 0; c < state.cupCount; c++) {
-            var card = document.createElement('div');
+        for (let c = 0; c < state.cupCount; c++) {
+            const card = document.createElement('div');
             card.className = 'cup-config';
 
-            var title = document.createElement('h3');
-            title.textContent = 'Filiżanka ' + (c + 1) + ' (' + state.cups[c].size + ' ml)';
+            const title = document.createElement('h3');
+            title.textContent = `Filiżanka ${c + 1} (${state.cups[c].size} ml)`;
             card.appendChild(title);
 
-            var group = document.createElement('div');
+            const group = document.createElement('div');
             group.className = 'button-group coffee-type';
 
-            for (var t = 0; t < typeKeys.length; t++) {
-                var key = typeKeys[t];
-                var ct = COFFEE_TYPES[key];
-                var btn = document.createElement('button');
+            for (const key of typeKeys) {
+                const ct = COFFEE_TYPES[key];
+                const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.dataset.value = key;
                 btn.innerHTML =
-                    '<span class="type-icon">' + ct.icon + '</span>' +
-                    '<span class="type-name">' + ct.label + '</span>';
+                    `<span class="type-icon">${ct.icon}</span>` +
+                    `<span class="type-name">${ct.label}</span>`;
                 if (state.cups[c].type === key) {
                     btn.classList.add('active');
                 }
                 group.appendChild(btn);
             }
 
-            (function (idx) {
-                group.addEventListener('click', function (e) {
-                    var b = e.target.closest('button');
-                    if (!b) return;
-                    group.querySelectorAll('button').forEach(function (x) {
-                        x.classList.remove('active');
-                    });
-                    b.classList.add('active');
-                    state.cups[idx].type = b.dataset.value;
+            group.addEventListener('click', (e) => {
+                const b = e.target.closest('button');
+                if (!b) return;
+                group.querySelectorAll('button').forEach((x) => {
+                    x.classList.remove('active');
                 });
-            })(c);
+                b.classList.add('active');
+                popButton(b);
+                state.cups[c].type = b.dataset.value;
+            });
 
             card.appendChild(group);
+            card.classList.add('cup-config-enter');
+            card.style.animationDelay = `${c * 0.08}s`;
             container.appendChild(card);
         }
-    }
+    };
 
-    document.getElementById('back-3').addEventListener('click', function () {
+    document.getElementById('back-3').addEventListener('click', () => {
         showStep(2);
     });
-    document.getElementById('next-3').addEventListener('click', function () {
+    document.getElementById('next-3').addEventListener('click', () => {
         showStep(4);
     });
 
@@ -284,11 +317,11 @@
 
     setupStaticGroup(document.getElementById('strength-group'), 'strength');
 
-    document.getElementById('back-4').addEventListener('click', function () {
+    document.getElementById('back-4').addEventListener('click', () => {
         showStep(3);
     });
-    document.getElementById('brew-btn').addEventListener('click', function () {
-        var recipe = calculateRecipe();
+    document.getElementById('brew-btn').addEventListener('click', () => {
+        const recipe = calculateRecipe();
         renderRecipe(recipe);
         showRecipe();
     });
@@ -297,22 +330,22 @@
     // RECIPE CALCULATION
     // ========================
 
-    function calculateRecipe() {
-        var strength = STRENGTHS[state.strength];
-        var cupsData = [];
-        var totalBase = 0;
-        var totalMilk = 0;
-        var totalFoam = 0;
-        var totalExtraWater = 0;
+    const calculateRecipe = () => {
+        const strength = STRENGTHS[state.strength];
+        const cupsData = [];
+        let totalBase = 0;
+        let totalMilk = 0;
+        let totalFoam = 0;
+        let totalExtraWater = 0;
 
-        for (var c = 0; c < state.cupCount; c++) {
-            var cup = state.cups[c];
-            var ct = COFFEE_TYPES[cup.type];
+        for (let c = 0; c < state.cupCount; c++) {
+            const cup = state.cups[c];
+            const ct = COFFEE_TYPES[cup.type];
 
-            var baseMl = Math.round(cup.size * ct.baseFraction);
-            var milkMl = Math.round(cup.size * ct.milk);
-            var foamMl = Math.round(cup.size * ct.foam);
-            var waterMl = Math.round(cup.size * ct.water);
+            const baseMl = Math.round(cup.size * ct.baseFraction);
+            const milkMl = Math.round(cup.size * ct.milk);
+            const foamMl = Math.round(cup.size * ct.foam);
+            const waterMl = Math.round(cup.size * ct.water);
 
             cupsData.push({
                 index: c + 1,
@@ -320,10 +353,10 @@
                 type: cup.type,
                 typeLabel: ct.label,
                 typeIcon: ct.icon,
-                baseMl: baseMl,
-                milkMl: milkMl,
-                foamMl: foamMl,
-                waterMl: waterMl
+                baseMl,
+                milkMl,
+                foamMl,
+                waterMl
             });
 
             totalBase += baseMl;
@@ -332,84 +365,99 @@
             totalExtraWater += waterMl;
         }
 
-        var coffeeGrams = Math.round(totalBase / strength.ratio);
+        const coffeeGrams = Math.round(totalBase / strength.ratio);
 
         return {
             cups: cupsData,
             totalBaseWater: totalBase,
-            coffeeGrams: coffeeGrams,
-            totalMilk: totalMilk,
-            totalFoam: totalFoam,
-            totalExtraWater: totalExtraWater,
-            temperature: '93–96',
+            coffeeGrams,
+            totalMilk,
+            totalFoam,
+            totalExtraWater,
+            temperature: '93\u201396',
             brewTime: strength.brewTime,
             strengthLabel: strength.label
         };
-    }
+    };
 
     // ========================
     // RENDER RECIPE
     // ========================
 
-    function renderRecipe(recipe) {
+    const renderRecipe = (recipe) => {
+        renderBrewAnimation();
         renderSummary(recipe);
         renderBreakdown(recipe);
+        initTimer(recipe);
         renderSteps(generateSteps(recipe));
         renderTips(recipe);
-    }
+    };
 
-    function renderSummary(recipe) {
-        var el = document.getElementById('recipe-summary');
-        var html =
-            '<div class="summary-item">' +
-                '<span class="summary-value">' + recipe.coffeeGrams + ' g</span>' +
-                '<span class="summary-label">Kawa mielona</span>' +
-            '</div>' +
-            '<div class="summary-item">' +
-                '<span class="summary-value">' + recipe.totalBaseWater + ' ml</span>' +
-                '<span class="summary-label">Woda do zaparzenia</span>' +
-            '</div>' +
-            '<div class="summary-item">' +
-                '<span class="summary-value">' + recipe.temperature + '°C</span>' +
-                '<span class="summary-label">Temperatura</span>' +
-            '</div>' +
-            '<div class="summary-item">' +
-                '<span class="summary-value">' + recipe.brewTime + ' min</span>' +
-                '<span class="summary-label">Czas parzenia</span>' +
-            '</div>';
+    const renderBrewAnimation = () => {
+        let anim = document.getElementById('brew-anim');
+        if (anim) anim.remove();
+        anim = document.createElement('div');
+        anim.className = 'brew-animation';
+        anim.id = 'brew-anim';
+        anim.innerHTML =
+            `<div class="brew-cup">` +
+                `<div class="brew-pour"></div>` +
+                `<div class="brew-liquid"></div>` +
+                `<div class="brew-steam"></div>` +
+                `<div class="brew-steam"></div>` +
+                `<div class="brew-steam"></div>` +
+                `<div class="brew-cup-handle"></div>` +
+            `</div>`;
+        const summary = document.getElementById('recipe-summary');
+        summary.parentNode.insertBefore(anim, summary);
+    };
+
+    const renderSummary = (recipe) => {
+        const el = document.getElementById('recipe-summary');
+        let html =
+            `<div class="summary-item">` +
+                `<span class="summary-value">${recipe.coffeeGrams} g</span>` +
+                `<span class="summary-label">Kawa mielona</span>` +
+            `</div>` +
+            `<div class="summary-item">` +
+                `<span class="summary-value">${recipe.totalBaseWater} ml</span>` +
+                `<span class="summary-label">Woda do zaparzenia</span>` +
+            `</div>` +
+            `<div class="summary-item">` +
+                `<span class="summary-value">${recipe.temperature}\u00B0C</span>` +
+                `<span class="summary-label">Temperatura</span>` +
+            `</div>` +
+            `<div class="summary-item">` +
+                `<span class="summary-value">${recipe.brewTime} min</span>` +
+                `<span class="summary-label">Czas parzenia</span>` +
+            `</div>`;
 
         if (recipe.totalMilk + recipe.totalFoam > 0) {
             html +=
-                '<div class="summary-item">' +
-                    '<span class="summary-value">' + (recipe.totalMilk + recipe.totalFoam) + ' ml</span>' +
-                    '<span class="summary-label">Mleko łącznie</span>' +
-                '</div>';
+                `<div class="summary-item">` +
+                    `<span class="summary-value">${recipe.totalMilk + recipe.totalFoam} ml</span>` +
+                    `<span class="summary-label">Mleko łącznie</span>` +
+                `</div>`;
         }
 
         if (recipe.totalExtraWater > 0) {
             html +=
-                '<div class="summary-item">' +
-                    '<span class="summary-value">' + recipe.totalExtraWater + ' ml</span>' +
-                    '<span class="summary-label">Dodatkowa woda</span>' +
-                '</div>';
+                `<div class="summary-item">` +
+                    `<span class="summary-value">${recipe.totalExtraWater} ml</span>` +
+                    `<span class="summary-label">Dodatkowa woda</span>` +
+                `</div>`;
         }
 
         el.innerHTML = html;
-    }
+    };
 
-    function renderBreakdown(recipe) {
-        var section = document.getElementById('recipe-breakdown');
-        var content = section.querySelector('.breakdown-content');
+    const renderBreakdown = (recipe) => {
+        const section = document.getElementById('recipe-breakdown');
+        const content = section.querySelector('.breakdown-content');
 
-        // Show breakdown when more than 1 cup or when drink isn't plain black
-        var needsBreakdown = state.cupCount > 1;
+        let needsBreakdown = state.cupCount > 1;
         if (!needsBreakdown) {
-            for (var c = 0; c < recipe.cups.length; c++) {
-                if (recipe.cups[c].type !== 'czarna') {
-                    needsBreakdown = true;
-                    break;
-                }
-            }
+            needsBreakdown = recipe.cups.some((cup) => cup.type !== 'czarna');
         }
 
         if (!needsBreakdown) {
@@ -419,242 +467,398 @@
 
         section.classList.remove('hidden');
 
-        var html = '';
-        for (var i = 0; i < recipe.cups.length; i++) {
-            var cup = recipe.cups[i];
+        let html = '';
+        for (const cup of recipe.cups) {
             html +=
-                '<div class="cup-breakdown">' +
-                    '<div class="cup-breakdown-header">' +
-                        '<span class="cup-num">' + cup.typeIcon + '</span>' +
-                        '<span>Filiżanka ' + cup.index + ' — ' + cup.typeLabel + ' (' + cup.size + ' ml)</span>' +
-                    '</div>' +
-                    '<div class="cup-breakdown-details">' +
-                        '<span class="detail-chip base">' + cup.baseMl + ' ml bazy</span>';
+                `<div class="cup-breakdown">` +
+                    `<div class="cup-breakdown-header">` +
+                        `<span class="cup-num">${cup.typeIcon}</span>` +
+                        `<span>Filiżanka ${cup.index} \u2014 ${cup.typeLabel} (${cup.size} ml)</span>` +
+                    `</div>` +
+                    `<div class="cup-breakdown-details">` +
+                        `<span class="detail-chip base">${cup.baseMl} ml bazy</span>`;
 
             if (cup.milkMl > 0) {
-                html += '<span class="detail-chip milk">' + cup.milkMl + ' ml mleka</span>';
+                html += `<span class="detail-chip milk">${cup.milkMl} ml mleka</span>`;
             }
             if (cup.foamMl > 0) {
-                html += '<span class="detail-chip foam">' + cup.foamMl + ' ml pianki</span>';
+                html += `<span class="detail-chip foam">${cup.foamMl} ml pianki</span>`;
             }
             if (cup.waterMl > 0) {
-                html += '<span class="detail-chip water">' + cup.waterMl + ' ml wody</span>';
+                html += `<span class="detail-chip water">${cup.waterMl} ml wody</span>`;
             }
 
             html +=
-                    '</div>' +
-                '</div>';
+                    `</div>` +
+                `</div>`;
         }
 
         content.innerHTML = html;
-    }
+    };
 
     // ========================
     // STEPS
     // ========================
 
-    function generateSteps(recipe) {
-        var steps = [];
-        var needsMilk = (recipe.totalMilk + recipe.totalFoam) > 0;
-        var totalMilkMl = recipe.totalMilk + recipe.totalFoam;
+    const generateSteps = (recipe) => {
+        const steps = [];
+        const needsMilk = (recipe.totalMilk + recipe.totalFoam) > 0;
+        const totalMilkMl = recipe.totalMilk + recipe.totalFoam;
 
-        // Blooming: 2x coffee grams in ml, but cap at 30% of total water
-        var bloomWater = recipe.coffeeGrams * 2;
+        let bloomWater = recipe.coffeeGrams * 2;
         if (bloomWater > recipe.totalBaseWater * 0.3) {
             bloomWater = Math.round(recipe.totalBaseWater * 0.3);
         }
-        var restWater = recipe.totalBaseWater - bloomWater;
+        const restWater = recipe.totalBaseWater - bloomWater;
 
-        // 1. Boil water
-        steps.push('Zagotuj wodę i odstaw na ok. 1 minutę (do ' + recipe.temperature + '°C)');
+        steps.push(`Zagotuj wod\u0119 i odstaw na ok. 1 minut\u0119 (do ${recipe.temperature}\u00B0C)`);
 
-        // 2. Measure coffee (+ heat milk if needed)
         if (needsMilk) {
             steps.push(
-                'Odmierz ' + recipe.coffeeGrams + ' g kawy grubo mielonej — ' +
-                'jednocześnie podgrzej ' + totalMilkMl + ' ml mleka do ok. 60°C (nie gotuj!)'
+                `Odmierz ${recipe.coffeeGrams} g kawy grubo mielonej \u2014 ` +
+                `jednocze\u015Bnie podgrzej ${totalMilkMl} ml mleka do ok. 60\u00B0C (nie gotuj!)`
             );
         } else {
-            steps.push('Odmierz ' + recipe.coffeeGrams + ' g kawy grubo mielonej');
+            steps.push(`Odmierz ${recipe.coffeeGrams} g kawy grubo mielonej`);
         }
 
-        // 3. Add coffee
-        steps.push('Wsyp kawę do French Pressa');
+        steps.push('Wsyp kaw\u0119 do French Pressa');
 
-        // 4. Blooming
         steps.push(
-            'Zalej ' + bloomWater + ' ml wody i odczekaj 30 sek — to blooming, ' +
-            'uwalnia CO\u2082 z kawy i poprawia ekstrakcję'
+            `Zalej ${bloomWater} ml wody i odczekaj 30 sek \u2014 to blooming, ` +
+            `uwalnia CO\u2082 z kawy i poprawia ekstrakcj\u0119`
         );
 
-        // 5. Rest of water
-        steps.push('Dolej pozostałe ' + restWater + ' ml wody');
-
-        // 6. Stir
+        steps.push(`Dolej pozosta\u0142e ${restWater} ml wody`);
         steps.push('Zamieszaj delikatnie');
+        steps.push(`Za\u0142\u00F3\u017C t\u0142ok (nie wciskaj) i odczekaj ${recipe.brewTime} min`);
+        steps.push('Powoli wci\u015Bnij t\u0142ok do dna');
 
-        // 7. Brew
-        steps.push('Załóż tłok (nie wciskaj) i odczekaj ' + recipe.brewTime + ' min');
-
-        // 8. Press
-        steps.push('Powoli wciśnij tłok do dna');
-
-        // 9+. Distribution
         if (!needsMilk) {
-            // No milk — pour directly
             if (state.cupCount === 1) {
-                var cup = recipe.cups[0];
+                const cup = recipe.cups[0];
                 if (cup.type === 'czarna') {
-                    steps.push('Przelej kawę do filiżanki');
+                    steps.push('Przelej kaw\u0119 do fili\u017Canki');
                 } else {
                     steps.push(
-                        'Przelej ' + cup.baseMl + ' ml kawy do filiżanki i dolej ' +
-                        cup.waterMl + ' ml gorącej wody'
+                        `Przelej ${cup.baseMl} ml kawy do fili\u017Canki i dolej ` +
+                        `${cup.waterMl} ml gor\u0105cej wody`
                     );
                 }
             } else {
-                for (var i = 0; i < recipe.cups.length; i++) {
-                    var c = recipe.cups[i];
-                    var line = 'Filiżanka ' + c.index + ' (' + c.typeLabel + '): przelej ' + c.baseMl + ' ml bazy';
-                    if (c.waterMl > 0) line += ' + dolej ' + c.waterMl + ' ml gorącej wody';
+                for (const c of recipe.cups) {
+                    let line = `Fili\u017Canka ${c.index} (${c.typeLabel}): przelej ${c.baseMl} ml bazy`;
+                    if (c.waterMl > 0) line += ` + dolej ${c.waterMl} ml gor\u0105cej wody`;
                     steps.push(line);
                 }
             }
         } else {
-            // Milk needed — pour coffee out, then froth milk in the press
-
-            // Pour base into cups
             if (state.cupCount === 1) {
-                var cup = recipe.cups[0];
-                steps.push('Przelej ' + cup.baseMl + ' ml kawy do filiżanki');
+                const cup = recipe.cups[0];
+                steps.push(`Przelej ${cup.baseMl} ml kawy do fili\u017Canki`);
             } else {
-                var pourParts = [];
-                for (var i = 0; i < recipe.cups.length; i++) {
-                    var c = recipe.cups[i];
-                    var part = 'fil. ' + c.index + ': ' + c.baseMl + ' ml';
-                    if (c.waterMl > 0) part += ' + ' + c.waterMl + ' ml wody';
-                    pourParts.push(part);
-                }
-                steps.push('Rozlej bazę kawy do filiżanek — ' + pourParts.join(', '));
+                const pourParts = recipe.cups.map((c) => {
+                    let part = `fil. ${c.index}: ${c.baseMl} ml`;
+                    if (c.waterMl > 0) part += ` + ${c.waterMl} ml wody`;
+                    return part;
+                });
+                steps.push(`Rozlej baz\u0119 kawy do fili\u017Canek \u2014 ${pourParts.join(', ')}`);
             }
 
-            // Froth milk in French Press
             steps.push(
-                'Przelej podgrzane mleko do French Pressa (max do połowy) ' +
-                'i energicznie pompuj tłokiem przez 10–15 sek, aż mleko podwoi objętość'
+                'Przelej podgrzane mleko do French Pressa (max do po\u0142owy) ' +
+                'i energicznie pompuj t\u0142okiem przez 10\u201315 sek, a\u017C mleko podwoi obj\u0119to\u015B\u0107'
             );
 
-            // Add frothed milk to cups
             if (state.cupCount === 1) {
-                var cup = recipe.cups[0];
-                var milkLine = 'Dodaj do filiżanki';
-                if (cup.milkMl > 0) milkLine += ' ' + cup.milkMl + ' ml spieninego mleka';
-                if (cup.foamMl > 0) milkLine += (cup.milkMl > 0 ? ' i ' : ' ') + cup.foamMl + ' ml pianki';
+                const cup = recipe.cups[0];
+                let milkLine = 'Dodaj do fili\u017Canki';
+                if (cup.milkMl > 0) milkLine += ` ${cup.milkMl} ml spieninego mleka`;
+                if (cup.foamMl > 0) milkLine += `${cup.milkMl > 0 ? ' i ' : ' '}${cup.foamMl} ml pianki`;
                 steps.push(milkLine);
             } else {
-                for (var i = 0; i < recipe.cups.length; i++) {
-                    var c = recipe.cups[i];
+                for (const c of recipe.cups) {
                     if (c.milkMl > 0 || c.foamMl > 0) {
-                        var line = 'Filiżanka ' + c.index + ' (' + c.typeLabel + '): dodaj';
-                        if (c.milkMl > 0) line += ' ' + c.milkMl + ' ml mleka';
-                        if (c.foamMl > 0) line += (c.milkMl > 0 ? ' i ' : ' ') + c.foamMl + ' ml pianki';
+                        let line = `Fili\u017Canka ${c.index} (${c.typeLabel}): dodaj`;
+                        if (c.milkMl > 0) line += ` ${c.milkMl} ml mleka`;
+                        if (c.foamMl > 0) line += `${c.milkMl > 0 ? ' i ' : ' '}${c.foamMl} ml pianki`;
                         steps.push(line);
                     }
                 }
             }
         }
 
-        steps.push('Gotowe — smacznej kawy! ☕');
+        steps.push('Gotowe \u2014 smacznej kawy! \u2615');
         return steps;
-    }
+    };
 
-    function renderSteps(stepsArr) {
-        var el = document.getElementById('steps-list');
+    const renderSteps = (stepsArr) => {
+        const el = document.getElementById('steps-list');
         el.innerHTML = '';
 
-        for (var i = 0; i < stepsArr.length; i++) {
-            var li = document.createElement('li');
+        for (const text of stepsArr) {
+            const li = document.createElement('li');
             li.innerHTML =
-                '<span class="step-checkbox"></span>' +
-                '<span class="step-text">' + stepsArr[i] + '</span>';
+                `<span class="step-checkbox"></span>` +
+                `<span class="step-text">${text}</span>`;
 
             li.addEventListener('click', function () {
                 this.classList.toggle('done');
+                if (this.classList.contains('done')) {
+                    this.classList.add('check-anim');
+                    setTimeout(() => {
+                        this.classList.remove('check-anim');
+                    }, 350);
+                }
             });
 
             el.appendChild(li);
         }
-    }
+    };
 
     // ========================
     // INFO TIPS
     // ========================
 
-    function renderTips(recipe) {
-        var el = document.getElementById('recipe-tips');
-        var needsMilk = (recipe.totalMilk + recipe.totalFoam) > 0;
+    const renderTips = (recipe) => {
+        const el = document.getElementById('recipe-tips');
+        const needsMilk = (recipe.totalMilk + recipe.totalFoam) > 0;
 
-        var tips = [
+        const tips = [
             {
                 cls: 'bloom',
-                icon: '🫧',
+                icon: '\uD83E\uDEE7',
                 title: 'Blooming',
-                text: 'Zalewanie kawy niewielką ilością wody uwalnia CO\u2082 uwięziony ' +
-                      'podczas palenia ziaren. Jeśli widzisz bąbelki na powierzchni — Twoja ' +
-                      'kawa jest świeża! Blooming poprawia ekstrakcję i daje pełniejszy smak.'
+                text: 'Zalewanie kawy niewielk\u0105 ilo\u015Bci\u0105 wody uwalnia CO\u2082 uwi\u0119ziony ' +
+                      'podczas palenia ziaren. Je\u015Bli widzisz b\u0105belki na powierzchni \u2014 Twoja ' +
+                      'kawa jest \u015Bwie\u017Ca! Blooming poprawia ekstrakcj\u0119 i daje pe\u0142niejszy smak.'
             },
             {
                 cls: 'temp',
-                icon: '🌡️',
+                icon: '\uD83C\uDF21\uFE0F',
                 title: 'Temperatura',
-                text: 'Optymalna temperatura parzenia to 93–96°C. Wrzatek parzy kawę ' +
-                      'zbyt intensywnie (gorzki smak), a za zimna woda da słabą, ' +
-                      'kwaśną ekstrakcję. Wystarczy odczekać ok. 1 min po zagotowaniu.'
+                text: 'Optymalna temperatura parzenia to 93\u201396\u00B0C. Wrzatek parzy kaw\u0119 ' +
+                      'zbyt intensywnie (gorzki smak), a za zimna woda da s\u0142ab\u0105, ' +
+                      'kwa\u015Bn\u0105 ekstrakcj\u0119. Wystarczy odczeka\u0107 ok. 1 min po zagotowaniu.'
             }
         ];
 
         if (needsMilk) {
             tips.push({
                 cls: 'milk',
-                icon: '🥛',
+                icon: '\uD83E\uDD5B',
                 title: 'Spienianie mleka',
-                text: 'French Press świetnie sprawdza się jako spieniacz! Podgrzej mleko ' +
-                      'do ok. 60°C (nie gotuj — powyżej 70°C białka się rozpadają), ' +
-                      'przelej do prasy max do połowy i energicznie pompuj tłokiem. ' +
-                      'Mleko podwoi objętość w 10–15 sekund.'
+                text: 'French Press \u015Bwietnie sprawdza si\u0119 jako spieniacz! Podgrzej mleko ' +
+                      'do ok. 60\u00B0C (nie gotuj \u2014 powy\u017Cej 70\u00B0C bia\u0142ka si\u0119 rozpadaj\u0105), ' +
+                      'przelej do prasy max do po\u0142owy i energicznie pompuj t\u0142okiem. ' +
+                      'Mleko podwoi obj\u0119to\u015B\u0107 w 10\u201315 sekund.'
             });
         }
 
         tips.push({
             cls: 'grind',
-            icon: '⚙️',
-            title: 'Stopień mielenia',
-            text: 'Do French Pressa używaj grubo mielonej kawy (jak gruby piasek). ' +
-                  'Zbyt drobne mielenie sprawi, że kawa przejdzie przez filtr siatkowy ' +
-                  'i napój będzie mętny i przeparzony.'
+            icon: '\u2699\uFE0F',
+            title: 'Stopie\u0144 mielenia',
+            text: 'Do French Pressa u\u017Cywaj grubo mielonej kawy (jak gruby piasek). ' +
+                  'Zbyt drobne mielenie sprawi, \u017Ce kawa przejdzie przez filtr siatkowy ' +
+                  'i nap\u00F3j b\u0119dzie m\u0119tny i przeparzony.'
         });
 
-        var html = '<h3>Dobre praktyki</h3>';
-        for (var i = 0; i < tips.length; i++) {
-            var t = tips[i];
+        let html = '<h3>Dobre praktyki</h3>';
+        for (const t of tips) {
             html +=
-                '<div class="info-bar ' + t.cls + '">' +
-                    '<span class="info-bar-icon">' + t.icon + '</span>' +
-                    '<div class="info-bar-body">' +
-                        '<span class="info-bar-title">' + t.title + '</span>' +
-                        t.text +
-                    '</div>' +
-                '</div>';
+                `<div class="info-bar ${t.cls}">` +
+                    `<span class="info-bar-icon">${t.icon}</span>` +
+                    `<div class="info-bar-body">` +
+                        `<span class="info-bar-title">${t.title}</span>` +
+                        `${t.text}` +
+                    `</div>` +
+                `</div>`;
         }
 
         el.innerHTML = html;
-    }
+    };
+
+    // ========================
+    // TIMER
+    // ========================
+
+    const RING_CIRCUMFERENCE = 2 * Math.PI * 54;
+    const timer = {
+        intervalId: null,
+        phase: 'bloom',
+        running: false,
+        secondsLeft: 0,
+        totalSeconds: 0,
+        bloomSeconds: 30,
+        brewSeconds: 0
+    };
+
+    const timerEls = {
+        time: document.getElementById('timer-time'),
+        phase: document.getElementById('timer-phase'),
+        ring: document.getElementById('timer-ring-progress'),
+        startBtn: document.getElementById('timer-start'),
+        resetBtn: document.getElementById('timer-reset'),
+        phaseBloom: document.getElementById('phase-bloom'),
+        phaseBrew: document.getElementById('phase-brew'),
+        ringWrap: document.querySelector('.timer-ring-wrap')
+    };
+
+    const formatTime = (secs) => {
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    };
+
+    const updateTimerDisplay = () => {
+        timerEls.time.textContent = formatTime(timer.secondsLeft);
+
+        const fraction = 1 - (timer.secondsLeft / timer.totalSeconds);
+        const offset = fraction * RING_CIRCUMFERENCE;
+        timerEls.ring.style.strokeDasharray = RING_CIRCUMFERENCE;
+        timerEls.ring.style.strokeDashoffset = RING_CIRCUMFERENCE - offset;
+
+        timerEls.ring.className = 'timer-ring-progress';
+        if (timer.phase === 'bloom') {
+            timerEls.phase.textContent = 'Blooming';
+            timerEls.ring.classList.add('blooming');
+        } else if (timer.phase === 'brew') {
+            timerEls.phase.textContent = 'Parzenie';
+            timerEls.ring.classList.add('brewing');
+        } else {
+            timerEls.phase.textContent = 'Gotowe!';
+            timerEls.ring.classList.add('done');
+        }
+    };
+
+    const updateTimerPhaseIndicators = () => {
+        timerEls.phaseBloom.className = 'timer-phase-indicator';
+        timerEls.phaseBrew.className = 'timer-phase-indicator';
+
+        if (timer.phase === 'bloom') {
+            timerEls.phaseBloom.classList.add('active');
+        } else if (timer.phase === 'brew') {
+            timerEls.phaseBloom.classList.add('completed');
+            timerEls.phaseBrew.classList.add('active');
+        } else {
+            timerEls.phaseBloom.classList.add('completed');
+            timerEls.phaseBrew.classList.add('completed');
+        }
+    };
+
+    const timerBeep = () => {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const beep = (freq, startTime, duration) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+            const now = ctx.currentTime;
+            beep(880, now, 0.15);
+            beep(880, now + 0.2, 0.15);
+            beep(1100, now + 0.4, 0.25);
+        } catch {
+            // AudioContext not available
+        }
+
+        if (navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]);
+        }
+    };
+
+    const stopTimer = () => {
+        timer.running = false;
+        if (timer.intervalId) {
+            clearInterval(timer.intervalId);
+            timer.intervalId = null;
+        }
+        timerEls.startBtn.textContent = 'Start';
+    };
+
+    const initTimer = (recipe) => {
+        stopTimer();
+        timer.brewSeconds = recipe.brewTime * 60;
+        timer.phase = 'bloom';
+        timer.secondsLeft = timer.bloomSeconds;
+        timer.totalSeconds = timer.bloomSeconds;
+        timer.running = false;
+        timerEls.startBtn.textContent = 'Start';
+        updateTimerDisplay();
+        updateTimerPhaseIndicators();
+    };
+
+    const tickTimer = () => {
+        if (timer.secondsLeft <= 0) {
+            if (timer.phase === 'bloom') {
+                timerBeep();
+                timer.phase = 'brew';
+                timer.secondsLeft = timer.brewSeconds;
+                timer.totalSeconds = timer.brewSeconds;
+                updateTimerPhaseIndicators();
+                timerEls.ringWrap.classList.add('pulsing');
+                setTimeout(() => {
+                    timerEls.ringWrap.classList.remove('pulsing');
+                }, 1800);
+            } else {
+                timerBeep();
+                timer.phase = 'done';
+                timer.running = false;
+                clearInterval(timer.intervalId);
+                timer.intervalId = null;
+                timerEls.startBtn.textContent = 'Start';
+                updateTimerPhaseIndicators();
+                timerEls.ringWrap.classList.add('pulsing');
+                setTimeout(() => {
+                    timerEls.ringWrap.classList.remove('pulsing');
+                }, 1800);
+            }
+            updateTimerDisplay();
+            return;
+        }
+        timer.secondsLeft--;
+        updateTimerDisplay();
+    };
+
+    const startTimer = () => {
+        if (timer.phase === 'done') return;
+        timer.running = true;
+        timerEls.startBtn.textContent = 'Pauza';
+        timer.intervalId = setInterval(tickTimer, 1000);
+    };
+
+    timerEls.startBtn.addEventListener('click', () => {
+        if (timer.phase === 'done') {
+            initTimer({ brewTime: timer.brewSeconds / 60 });
+            return;
+        }
+        if (timer.running) {
+            stopTimer();
+        } else {
+            startTimer();
+        }
+    });
+
+    timerEls.resetBtn.addEventListener('click', () => {
+        initTimer({ brewTime: timer.brewSeconds / 60 });
+    });
 
     // ========================
     // BACK TO START
     // ========================
 
-    document.getElementById('back-btn').addEventListener('click', function () {
+    document.getElementById('back-btn').addEventListener('click', () => {
+        stopTimer();
+        const anim = document.getElementById('brew-anim');
+        if (anim) anim.remove();
         showStep(1);
     });
 
