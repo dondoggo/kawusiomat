@@ -905,14 +905,6 @@ header h1 {
 }
 
 /* Cup config stagger */
-.cup-config {
-    background: var(--bg);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
 .cup-config-enter {
     opacity: 0;
     animation: fadeSlideIn 0.3s ease-out both;

@@ -128,12 +128,28 @@
         }
         recipeSection.classList.remove('hidden');
         wizardProgress.classList.add('hidden');
-        animateCard(recipeSection);
-        animateRecipeChildren();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        requestAnimationFrame(() => {
+            animateCard(recipeSection);
+            animateRecipeChildren();
+        });
+    };
+
+    const resetAnimationClasses = () => {
+        const summary = document.getElementById('recipe-summary');
+        summary.classList.remove('summary-pop');
+
+        recipeSection.querySelectorAll('.stagger-item').forEach((el) => {
+            el.classList.remove('stagger-item');
+            el.style.removeProperty('animation-delay');
+        });
     };
 
     const animateRecipeChildren = () => {
+        resetAnimationClasses();
+        void recipeSection.offsetWidth;
+
         const summary = document.getElementById('recipe-summary');
         summary.classList.add('summary-pop');
         summary.querySelectorAll('.summary-item').forEach((item, i) => {
@@ -859,6 +875,8 @@
         stopTimer();
         const anim = document.getElementById('brew-anim');
         if (anim) anim.remove();
+        resetAnimationClasses();
+        recipeSection.classList.remove('card-enter');
         showStep(1);
     });
 

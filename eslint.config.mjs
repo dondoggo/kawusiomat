@@ -13,6 +13,7 @@ export default [
                 clearInterval: 'readonly',
                 setInterval: 'readonly',
                 AudioContext: 'readonly',
+                requestAnimationFrame: 'readonly',
                 console: 'readonly'
             }
         },
