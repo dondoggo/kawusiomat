@@ -3,7 +3,7 @@
 ================================================================================
 
 Data utworzenia: 2026-02-12
-Ostatnia aktualizacja: 2026-02-26
+Ostatnia aktualizacja: 2026-02-27
 Wersja aplikacji: 1.2
 Stack: HTML + CSS + vanilla JavaScript ES6+ (bez frameworkow)
 Linter: ESLint 10 (eslint.config.mjs)
@@ -68,8 +68,18 @@ spienianiem mleka i poradami. Dziala offline (PWA).
     CACHE_NAME w sw.js (np. kawusiomat-v2, v3...) aby uzytkownicy
     dostali nowe pliki — bez tego SW serwuje stary cache!
 
-[ ] Tryb ciemny
-    - Przelacznik jasny/ciemny w naglowku
+[x] Drugi motyw: Nowoczesny (zrealizowano 2026-02-27)
+    - Inspiracja: foundationcoffee.pl — czerń, biel, niebieski #0046ff
+    - Paleta: --accent #111, --bg #f2f2f2, --done #0046ff (zamiast zielonego)
+    - Typografia: Helvetica Neue / Arial (zamiast Georgia), letter-spacing -0.025em
+    - Karty: border 1px solid #d0d0d0, border-radius 4px (zamiast 16px + cien)
+    - Przyciski: border-radius 4px, hover: #333 / #f5f5f5
+    - Przycisk przełączania motywu (◑) w prawym gornym rogu kontenera
+    - Brak FOUC: inline <script> w <head> ustawia data-theme przed renderem CSS
+    - Wybor motywu zapisany w localStorage (klucz: kawusiomat_theme)
+
+[ ] Tryb ciemny (dark mode)
+    - Przelacznik jasny/ciemny w naglowku (lub osobny od motywu)
     - Respektowanie preferencji systemowych (prefers-color-scheme)
     - Zapisanie wyboru w localStorage
 

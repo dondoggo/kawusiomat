@@ -11,9 +11,11 @@
     <link rel="apple-touch-icon" href="icon.svg">
     <title>Kawusiomat</title>
     <link rel="stylesheet" href="style.css">
+    <script>(function() { const t = localStorage.getItem('kawusiomat_theme'); if (t === 'modern') document.documentElement.setAttribute('data-theme', 'modern'); }());</script>
 </head>
 <body>
     <div class="container">
+        <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" title="Przełącz motyw">◑</button>
         <header>
             <h1>☕ Kawusiomat</h1>
             <p class="subtitle">Stwórz idealną kawę krok po kroku</p>

@@ -1074,6 +1074,34 @@
     });
 
     // ========================
+    // THEME
+    // ========================
+
+    const THEME_KEY = 'kawusiomat_theme';
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+
+    const updateThemeBtn = () => {
+        const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
+        themeToggleBtn.title = isModern
+            ? 'Motyw: Nowoczesny — kliknij, aby przełączyć na Klasyczny'
+            : 'Motyw: Klasyczny — kliknij, aby przełączyć na Nowoczesny';
+    };
+
+    updateThemeBtn();
+
+    themeToggleBtn.addEventListener('click', () => {
+        const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
+        if (isModern) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem(THEME_KEY, 'classic');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'modern');
+            localStorage.setItem(THEME_KEY, 'modern');
+        }
+        updateThemeBtn();
+    });
+
+    // ========================
     // INIT
     // ========================
 
