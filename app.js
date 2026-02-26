@@ -178,6 +178,12 @@
     // HELPERS
     // ========================
 
+    const escapeHtml = (s) => s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
     const pluralizeCups = (n) => {
         if (n === 1) return 'filiżanka';
         if (n >= 2 && n <= 4) return 'filiżanki';
@@ -937,11 +943,29 @@
     });
 
     let toastTimer = null;
+    let lastDeletedFav = null;
+
     const showToast = (msg) => {
         toastEl.textContent = msg;
         toastEl.classList.add('toast-show');
         if (toastTimer) clearTimeout(toastTimer);
         toastTimer = setTimeout(() => toastEl.classList.remove('toast-show'), 2500);
+    };
+
+    const showUndoToast = (msg, onUndo) => {
+        if (toastTimer) clearTimeout(toastTimer);
+        toastEl.innerHTML =
+            `<span>${escapeHtml(msg)}</span>` +
+            `<button type="button" class="toast-undo-btn">Cofnij</button>`;
+        toastEl.classList.add('toast-show');
+        toastEl.querySelector('.toast-undo-btn').addEventListener('click', () => {
+            clearTimeout(toastTimer);
+            toastEl.classList.remove('toast-show');
+            onUndo();
+        });
+        toastTimer = setTimeout(() => {
+            toastEl.classList.remove('toast-show');
+        }, 5000);
     };
 
     const isSameRecipe = (fav) =>
@@ -950,8 +974,19 @@
         fav.cups.every((c, i) => state.cups[i] && c.type === state.cups[i].type && c.size === state.cups[i].size);
 
     const deleteFavorite = (id) => {
-        saveFavorites(loadFavorites().filter((f) => f.id !== id));
+        const favs = loadFavorites();
+        const idx = favs.findIndex((f) => f.id === id);
+        if (idx === -1) return;
+        lastDeletedFav = { fav: { ...favs[idx] }, idx };
+        saveFavorites(favs.filter((f) => f.id !== id));
         renderFavoritesList();
+        showUndoToast(`Usunięto „${lastDeletedFav.fav.label}"`, () => {
+            const current = loadFavorites();
+            current.splice(lastDeletedFav.idx, 0, lastDeletedFav.fav);
+            saveFavorites(current);
+            lastDeletedFav = null;
+            renderFavoritesList();
+        });
     };
 
     const loadFavoriteToState = (fav) => {
@@ -971,6 +1006,49 @@
         showRecipe();
     };
 
+    const startEditFavName = (labelEl, id) => {
+        const fav = loadFavorites().find((f) => f.id === id);
+        if (!fav) return;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = fav.label;
+        input.className = 'fav-name-input';
+        input.maxLength = 50;
+        labelEl.replaceWith(input);
+        input.focus();
+        input.select();
+
+        let committed = false;
+
+        const confirm = () => {
+            if (committed) return;
+            committed = true;
+            const newLabel = input.value.trim() || fav.label;
+            const updated = loadFavorites().map((f) => f.id === id ? { ...f, label: newLabel } : f);
+            saveFavorites(updated);
+            renderFavoritesList();
+        };
+
+        const cancel = () => {
+            if (committed) return;
+            committed = true;
+            renderFavoritesList();
+        };
+
+        input.addEventListener('blur', confirm);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                input.removeEventListener('blur', confirm);
+                confirm();
+            }
+            if (e.key === 'Escape') {
+                input.removeEventListener('blur', confirm);
+                cancel();
+            }
+        });
+    };
+
     const renderFavoritesList = () => {
         const favs = loadFavorites();
         if (favs.length === 0) {
@@ -986,7 +1064,7 @@
             html +=
                 `<div class="fav-item">` +
                     `<div class="fav-info">` +
-                        `<div class="fav-label">${fav.label}</div>` +
+                        `<div class="fav-label fav-label-editable" data-id="${fav.id}" title="Kliknij, aby zmienić nazwę">${escapeHtml(fav.label)}</div>` +
                         `<div class="fav-meta">${fav.strengthLabel} · ${formatFavDate(fav.date)}</div>` +
                     `</div>` +
                     `<div class="fav-actions">` +
@@ -1008,6 +1086,10 @@
             btn.addEventListener('click', () => {
                 deleteFavorite(Number(btn.dataset.id));
             });
+        });
+
+        favoritesList.querySelectorAll('.fav-label-editable').forEach((el) => {
+            el.addEventListener('click', () => startEditFavName(el, Number(el.dataset.id)));
         });
     };
 
