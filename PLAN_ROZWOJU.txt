@@ -3,7 +3,7 @@
 ================================================================================
 
 Data utworzenia: 2026-02-12
-Ostatnia aktualizacja: 2026-02-27
+Ostatnia aktualizacja: 2026-02-27 (2)
 Wersja aplikacji: 1.2
 Stack: HTML + CSS + vanilla JavaScript ES6+ (bez frameworkow)
 Linter: ESLint 10 (eslint.config.mjs)
@@ -99,15 +99,18 @@ spienianiem mleka i poradami. Dziala offline (PWA).
     - Kopiowanie przepisu jako tekst do schowka
     - Web Share API na urzadzeniach mobilnych (navigator.share)
 
-[ ] Zmiana nazwy ulubionego przepisu
+[x] Zmiana nazwy ulubionego przepisu (zrealizowano 2026-02-27)
     - Inline edit po kliknieciu w nazwe przepisu na liscie ulubionych
-    - Domyslna nazwa generowana automatycznie, ale uzytkownik moze
-      nadac swoja (np. "Poranna mocna", "Dla gosci")
-    - Zapis w tym samym obiekcie w localStorage
+    - Enter / blur = zapis, Escape = anulowanie, puste pole = poprzednia nazwa
+    - Domyslna nazwa generowana automatycznie, uzytkownik moze nadac swoja
+    - Zapis w tym samym obiekcie w localStorage (pole label)
+    - escapeHtml() zabezpiecza przed XSS przy wyswietlaniu w innerHTML
 
-[ ] Potwierdzenie usuwania ulubionego
-    - Zamiast natychmiastowego usuniecia: inline "Usunac? Tak / Nie"
-    - Lub przycisk "Cofnij" w tostcie przez 5 sekund (undo pattern)
+[x] Potwierdzenie usuwania ulubionego (zrealizowano 2026-02-27)
+    - Wzorzec undo: przepis usuwany natychmiast z localStorage
+    - Toast "Usunieto [nazwa] — Cofnij" widoczny przez 5 sekund
+    - Klikniecie Cofnij przywraca przepis na ta sama pozycje na liscie
+    - pointer-events: auto na toast-show (toast byl nieinteraktywny)
 
 [ ] Customizable czas parzenia
     - Mozliwosc nadpisania domyslnego czasu (3/4/5 min) przez uzytkownika
