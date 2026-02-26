@@ -79,6 +79,10 @@
     const progressFill = document.getElementById('progress-fill');
     const progressDots = document.querySelectorAll('.progress-dot');
     const wizardProgress = document.getElementById('wizard-progress');
+    const favoritesPanel = document.getElementById('favorites-panel');
+    const favoritesList = document.getElementById('favorites-list');
+    const favoritesCount = document.getElementById('favorites-count');
+    const toastEl = document.getElementById('toast');
 
     // ========================
     // PROGRESS BAR
@@ -117,6 +121,11 @@
         }
         recipeSection.classList.add('hidden');
         wizardProgress.classList.remove('hidden');
+        if (stepNum === 1) {
+            renderFavoritesList();
+        } else {
+            favoritesPanel.classList.add('hidden');
+        }
         updateProgress(stepNum, 4);
         animateCard(stepSections[stepNum]);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -128,6 +137,7 @@
         }
         recipeSection.classList.remove('hidden');
         wizardProgress.classList.add('hidden');
+        favoritesPanel.classList.add('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         requestAnimationFrame(() => {
@@ -349,7 +359,7 @@
     const calculateRecipe = () => {
         const strength = STRENGTHS[state.strength];
         const cupsData = [];
-        let totalBase = 0;
+        let totalTargetBrew = 0;
         let totalMilk = 0;
         let totalFoam = 0;
         let totalExtraWater = 0;
@@ -375,17 +385,21 @@
                 waterMl
             });
 
-            totalBase += baseMl;
+            totalTargetBrew += baseMl;
             totalMilk += milkMl;
             totalFoam += foamMl;
             totalExtraWater += waterMl;
         }
 
-        const coffeeGrams = Math.round(totalBase / strength.ratio);
+        // Fusy kawy pochłaniają ~2 ml wody na gram kawy (standard SCA).
+        // Aby uzyskać targetową objętość naparu, trzeba zalać więcej wody:
+        //   waterNeeded = targetBrew * ratio / (ratio - 2)
+        const totalBaseWater = Math.round(totalTargetBrew * strength.ratio / (strength.ratio - 2));
+        const coffeeGrams = Math.round(totalBaseWater / strength.ratio);
 
         return {
             cups: cupsData,
-            totalBaseWater: totalBase,
+            totalBaseWater,
             coffeeGrams,
             totalMilk,
             totalFoam,
@@ -881,8 +895,177 @@
     });
 
     // ========================
+    // FAVORITES
+    // ========================
+
+    const STORAGE_KEY = 'kawusiomat_favorites';
+
+    const loadFavorites = () => {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+            return [];
+        }
+    };
+
+    const saveFavorites = (favs) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
+    };
+
+    const generateFavoriteLabel = () => {
+        if (state.cupCount === 1) {
+            const c = state.cups[0];
+            return `${COFFEE_TYPES[c.type].icon} ${COFFEE_TYPES[c.type].label} · ${c.size} ml`;
+        }
+        const icons = state.cups.map((c) => COFFEE_TYPES[c.type].icon).join('');
+        const uniqueTypes = [...new Set(state.cups.map((c) => COFFEE_TYPES[c.type].label))];
+        const summary = uniqueTypes.length === 1 ? uniqueTypes[0] : `${state.cupCount} filiżanki`;
+        return `${icons} ${summary}`;
+    };
+
+    const formatFavDate = (ts) => new Date(ts).toLocaleDateString('pl-PL', {
+        day: 'numeric',
+        month: 'short'
+    });
+
+    let toastTimer = null;
+    const showToast = (msg) => {
+        toastEl.textContent = msg;
+        toastEl.classList.add('toast-show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('toast-show'), 2500);
+    };
+
+    const deleteFavorite = (id) => {
+        saveFavorites(loadFavorites().filter((f) => f.id !== id));
+        renderFavoritesList();
+    };
+
+    const loadFavoriteToState = (fav) => {
+        state.cupCount = fav.cupCount;
+        state.cups = fav.cups.map((c) => ({ ...c }));
+        state.strength = fav.strength;
+
+        document.querySelectorAll('#cup-count-group button').forEach((b) => {
+            b.classList.toggle('active', parseInt(b.dataset.value, 10) === fav.cupCount);
+        });
+        document.querySelectorAll('#strength-group button').forEach((b) => {
+            b.classList.toggle('active', b.dataset.value === fav.strength);
+        });
+
+        const recipe = calculateRecipe();
+        renderRecipe(recipe);
+        showRecipe();
+    };
+
+    const renderFavoritesList = () => {
+        const favs = loadFavorites();
+        if (favs.length === 0) {
+            favoritesPanel.classList.add('hidden');
+            return;
+        }
+
+        favoritesPanel.classList.remove('hidden');
+        favoritesCount.textContent = String(favs.length);
+
+        let html = '';
+        for (const fav of favs) {
+            html +=
+                `<div class="fav-item">` +
+                    `<div class="fav-info">` +
+                        `<div class="fav-label">${fav.label}</div>` +
+                        `<div class="fav-meta">${fav.strengthLabel} \u00b7 ${formatFavDate(fav.date)}</div>` +
+                    `</div>` +
+                    `<div class="fav-actions">` +
+                        `<button type="button" class="btn-fav-load" data-id="${fav.id}">Za\u0142aduj</button>` +
+                        `<button type="button" class="btn-fav-del" data-id="${fav.id}" aria-label="Usu\u0144">\u00d7</button>` +
+                    `</div>` +
+                `</div>`;
+        }
+        favoritesList.innerHTML = html;
+
+        favoritesList.querySelectorAll('.btn-fav-load').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const fav = loadFavorites().find((f) => f.id === Number(btn.dataset.id));
+                if (fav) loadFavoriteToState(fav);
+            });
+        });
+
+        favoritesList.querySelectorAll('.btn-fav-del').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                deleteFavorite(Number(btn.dataset.id));
+            });
+        });
+    };
+
+    document.getElementById('favorites-toggle').addEventListener('click', () => {
+        const isOpen = favoritesPanel.classList.toggle('favorites-open');
+        document.getElementById('favorites-chevron').textContent = isOpen ? '\u25b2' : '\u25bc';
+    });
+
+    const saveBtnEl = document.getElementById('save-btn');
+    saveBtnEl.addEventListener('click', () => {
+        const newFav = {
+            id: Date.now(),
+            label: generateFavoriteLabel(),
+            strengthLabel: STRENGTHS[state.strength].label,
+            date: Date.now(),
+            cupCount: state.cupCount,
+            cups: state.cups.map((c) => ({ ...c })),
+            strength: state.strength
+        };
+        const favs = loadFavorites();
+        favs.unshift(newFav);
+        if (favs.length > 20) favs.length = 20;
+        saveFavorites(favs);
+        renderFavoritesList();
+        showToast('Przepis zapisany \u2b50');
+        saveBtnEl.textContent = 'Zapisano \u2713';
+        saveBtnEl.disabled = true;
+        setTimeout(() => {
+            saveBtnEl.textContent = 'Zapisz \u2b50';
+            saveBtnEl.disabled = false;
+        }, 2000);
+    });
+
+    // ========================
+    // PWA
+    // ========================
+
+    let pwaInstallPrompt = null;
+    const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        pwaInstallPrompt = e;
+        pwaInstallBtn.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+        pwaInstallPrompt = null;
+        pwaInstallBtn.classList.add('hidden');
+    });
+
+    pwaInstallBtn.addEventListener('click', async () => {
+        if (!pwaInstallPrompt) return;
+        await pwaInstallPrompt.prompt();
+        const { outcome } = await pwaInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+            pwaInstallBtn.classList.add('hidden');
+        }
+        pwaInstallPrompt = null;
+    });
+
+    // ========================
     // INIT
     // ========================
 
     updateProgress(1, 4);
+    renderFavoritesList();
 })();
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+}

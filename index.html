@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6f4e37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Kawusiomat">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
     <title>Kawusiomat</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -11,6 +17,9 @@
         <header>
             <h1>☕ Kawusiomat</h1>
             <p class="subtitle">Stwórz idealną kawę krok po kroku</p>
+            <button type="button" id="pwa-install-btn" class="pwa-install-btn hidden">
+                📲 Zainstaluj aplikację
+            </button>
         </header>
 
         <!-- Progress -->
@@ -39,6 +48,16 @@
         </div>
 
         <main>
+            <!-- Favorites panel -->
+            <div class="favorites-panel favorites-open hidden" id="favorites-panel">
+                <div class="favorites-header" id="favorites-toggle">
+                    <span class="favorites-title">⭐ Twoje przepisy</span>
+                    <span class="favorites-badge" id="favorites-count">0</span>
+                    <span class="favorites-chevron" id="favorites-chevron">▲</span>
+                </div>
+                <div class="favorites-list" id="favorites-list"></div>
+            </div>
+
             <!-- STEP 1: Cup count -->
             <section class="card" id="step-1">
                 <h2>Ile filiżanek?</h2>
@@ -149,9 +168,10 @@
 
                 <div id="recipe-tips"></div>
 
-                <button type="button" class="btn-back" id="back-btn">
-                    ← Od nowa
-                </button>
+                <div class="recipe-actions">
+                    <button type="button" class="btn-back" id="back-btn">← Od nowa</button>
+                    <button type="button" class="btn-save" id="save-btn">Zapisz ⭐</button>
+                </div>
             </section>
         </main>
 
@@ -160,6 +180,7 @@
         </footer>
     </div>
 
+    <div class="toast" id="toast"></div>
     <script src="app.js"></script>
 </body>
 </html>

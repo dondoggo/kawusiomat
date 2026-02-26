@@ -50,28 +50,18 @@ spienianiem mleka i poradami.
     - Osobny timer na blooming (30 sek) i glowne parzenie
     - Kolowy SVG ring z postepem, start/pauza/reset, animacja pulsowania
 
-[ ] Zapisywanie ulubionych przepisow (localStorage)
+[x] Zapisywanie ulubionych przepisow (localStorage) (zrealizowano 2026-02-26)
     - Przycisk "Zapisz przepis" na ekranie wyniku
     - Lista zapisanych przepisow dostepna z ekranu glownego
     - Mozliwosc usuwania zapisanych przepisow
 
-[ ] Tryb offline (PWA)
+[x] Tryb offline (PWA) (zrealizowano 2026-02-26)
     - Manifest.json + Service Worker
     - Mozliwosc instalacji na telefonie
     - Pelna funkcjonalnosc bez internetu
 
 --- PRIORYTET SREDNI ---
 
-[ ] Wiecej metod parzenia
-    - Drip/przelewowy (V60, Chemex)
-    - Aeropress
-    - Kawiarka (Moka pot)
-    - Kazda metoda z wlasnym zestawem krokow i proporcji
-
-[ ] Jednostki imperialne
-    - Przelacznik ml/oz i g/oz
-    - Temperatura w Fahrenheitach
-    - Zapamietywanie preferencji
 
 [ ] Tryb ciemny
     - Przelacznik jasny/ciemny

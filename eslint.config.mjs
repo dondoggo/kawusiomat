@@ -9,12 +9,15 @@ export default [
                 window: 'readonly',
                 document: 'readonly',
                 navigator: 'readonly',
+                localStorage: 'readonly',
                 setTimeout: 'readonly',
+                clearTimeout: 'readonly',
                 clearInterval: 'readonly',
                 setInterval: 'readonly',
                 AudioContext: 'readonly',
                 requestAnimationFrame: 'readonly',
-                console: 'readonly'
+                console: 'readonly',
+                Promise: 'readonly'
             }
         },
         rules: {
