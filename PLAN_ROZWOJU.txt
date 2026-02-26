@@ -206,41 +206,35 @@ spienianiem mleka i poradami. Dziala offline (PWA).
 
 --- BLEDY / DEAD CODE ---
 
-[ ] state.currentStep — dead code
+[x] state.currentStep — dead code (naprawiono 2026-02-27)
     - Pole ustawiane w showStep() ale nigdzie nie odczytywane
-    - Usunac z obiektu state i z funkcji showStep
-    - Linie: 64 (state def), 118 (showStep)
+    - Usunieto z obiektu state i z funkcji showStep
 
-[ ] generateSteps() czyta state.cupCount bezposrednio
-    - Linie 568 i 586 uzywa state.cupCount zamiast recipe.cups.length
-    - Ukryta zaleznosc od globalnego stanu zamiast od przekazanego obiektu
-    - Poprawic: zastapic state.cupCount na recipe.cups.length
+[x] generateSteps() czytalo state.cupCount bezposrednio (naprawiono 2026-02-27)
+    - 3 wystapienia zastapione przez recipe.cups.length
+    - Eliminuje ukryta zaleznosc od globalnego stanu
 
-[ ] Gramatyka PL w generateFavoriteLabel()
-    - "${n} filizanki" jest poprawne dla 2-4, blad dla 5-6
-    - Poprawic: dodac funkcje pl(n) -> "filizanka" / "filizanki" / "filizanek"
+[x] Gramatyka PL w generateFavoriteLabel() (naprawiono 2026-02-27)
+    - Dodano helper pluralizeCups(n): filizanka / filizanki / filizanek
+    - Poprawnie dla 1, 2-4 i 5+ filizanek
 
-[ ] Brak deduplikacji przy zapisie ulubionych
-    - Mozna zapisac ten sam przepis wielokrotnie klikajac "Zapisz"
-    - Rozwiazanie: porownac cups/strength/cupCount przy zapisie
+[x] Brak deduplikacji przy zapisie ulubionych (naprawiono 2026-02-27)
+    - Dodano isSameRecipe(fav): porownuje strength/cupCount/cups
+    - Przy probie zapisu duplikatu: toast "Ten przepis jest juz zapisany"
 
 --- DROBNE PROBLEMY ---
 
-[ ] timerBeep() tworzy nowy AudioContext przy kazdym wywolaniu
-    - Chrome ma limit ~6 instancji AudioContext
-    - W praktyce nieszkodliwe (max 2 beepy/sesje), ale warto naprawic
-    - Poprawic: stworzyc ctx raz przy starcie (leniwa inicjalizacja
-      przy pierwszym wywolaniu timerBeep, nie przy starcie IIFE)
+[x] timerBeep() tworzylo nowy AudioContext przy kazdym wywolaniu (naprawiono 2026-02-27)
+    - Dodano let audioCtx = null z leniwą inicjalizacja
+    - AudioContext tworzony raz, reuzywany przy kolejnych dzwiekach
 
-[ ] favorites-chevron query w event handlerze
-    - document.getElementById('favorites-chevron') wywolywane przy
-      kazdym kliknieciu zamiast uzywac cached ref z DOM REFS sekcji
-    - Linia 1003: dodac const favoritesChevron do sekcji DOM REFS
+[x] favorites-chevron query w event handlerze (naprawiono 2026-02-27)
+    - Dodano const favoritesChevron do sekcji DOM REFS
+    - Handler uzywa cached ref zamiast document.getElementById
 
-[ ] Kodowanie znakow w app.js — niekonsekwentne
-    - Polskie znaki zapisane jako \u0142, \u015B itp. zamiast UTF-8
-    - index.html uzywa UTF-8 bezposrednio, app.js uzywa escape sequences
-    - Poprawic: zmienic encoding pliku i zapisac znaki bezposrednio
+[x] Kodowanie znakow w app.js — niekonsekwentne (naprawiono 2026-02-27)
+    - Polskie znaki i symbole zastapione bezposrednim UTF-8
+    - Pozostaly tylko 3 emoji surrogate pairs (\uD83E...) — poprawny JS
 
 --- PWA ---
 

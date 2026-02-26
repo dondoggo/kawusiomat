@@ -61,7 +61,6 @@
     // ========================
 
     const state = {
-        currentStep: 1,
         cupCount: 1,
         cups: [{ size: 250, type: 'czarna' }],
         strength: 'medium'
@@ -82,6 +81,7 @@
     const favoritesPanel = document.getElementById('favorites-panel');
     const favoritesList = document.getElementById('favorites-list');
     const favoritesCount = document.getElementById('favorites-count');
+    const favoritesChevron = document.getElementById('favorites-chevron');
     const toastEl = document.getElementById('toast');
 
     // ========================
@@ -115,7 +115,6 @@
     };
 
     const showStep = (stepNum) => {
-        state.currentStep = stepNum;
         for (let s = 1; s <= 4; s++) {
             stepSections[s].classList.toggle('hidden', s !== stepNum);
         }
@@ -178,6 +177,12 @@
     // ========================
     // HELPERS
     // ========================
+
+    const pluralizeCups = (n) => {
+        if (n === 1) return 'filiżanka';
+        if (n >= 2 && n <= 4) return 'filiżanki';
+        return 'filiżanek';
+    };
 
     const syncCups = () => {
         while (state.cups.length < state.cupCount) {
@@ -404,7 +409,7 @@
             totalMilk,
             totalFoam,
             totalExtraWater,
-            temperature: '93\u201396',
+            temperature: '93–96',
             brewTime: strength.brewTime,
             strengthLabel: strength.label
         };
@@ -454,7 +459,7 @@
                 `<span class="summary-label">Woda do zaparzenia</span>` +
             `</div>` +
             `<div class="summary-item">` +
-                `<span class="summary-value">${recipe.temperature}\u00B0C</span>` +
+                `<span class="summary-value">${recipe.temperature}°C</span>` +
                 `<span class="summary-label">Temperatura</span>` +
             `</div>` +
             `<div class="summary-item">` +
@@ -503,7 +508,7 @@
                 `<div class="cup-breakdown">` +
                     `<div class="cup-breakdown-header">` +
                         `<span class="cup-num">${cup.typeIcon}</span>` +
-                        `<span>Filiżanka ${cup.index} \u2014 ${cup.typeLabel} (${cup.size} ml)</span>` +
+                        `<span>Filiżanka ${cup.index} — ${cup.typeLabel} (${cup.size} ml)</span>` +
                     `</div>` +
                     `<div class="cup-breakdown-details">` +
                         `<span class="detail-chip base">${cup.baseMl} ml bazy</span>`;
@@ -541,75 +546,75 @@
         }
         const restWater = recipe.totalBaseWater - bloomWater;
 
-        steps.push(`Zagotuj wod\u0119 i odstaw na ok. 1 minut\u0119 (do ${recipe.temperature}\u00B0C)`);
+        steps.push(`Zagotuj wodę i odstaw na ok. 1 minutę (do ${recipe.temperature}°C)`);
 
         if (needsMilk) {
             steps.push(
-                `Odmierz ${recipe.coffeeGrams} g kawy grubo mielonej \u2014 ` +
-                `jednocze\u015Bnie podgrzej ${totalMilkMl} ml mleka do ok. 60\u00B0C (nie gotuj!)`
+                `Odmierz ${recipe.coffeeGrams} g kawy grubo mielonej — ` +
+                `jednocześnie podgrzej ${totalMilkMl} ml mleka do ok. 60°C (nie gotuj!)`
             );
         } else {
             steps.push(`Odmierz ${recipe.coffeeGrams} g kawy grubo mielonej`);
         }
 
-        steps.push('Wsyp kaw\u0119 do French Pressa');
+        steps.push('Wsyp kawę do French Pressa');
 
         steps.push(
-            `Zalej ${bloomWater} ml wody i odczekaj 30 sek \u2014 to blooming, ` +
-            `uwalnia CO\u2082 z kawy i poprawia ekstrakcj\u0119`
+            `Zalej ${bloomWater} ml wody i odczekaj 30 sek — to blooming, ` +
+            `uwalnia CO₂ z kawy i poprawia ekstrakcję`
         );
 
-        steps.push(`Dolej pozosta\u0142e ${restWater} ml wody`);
+        steps.push(`Dolej pozostałe ${restWater} ml wody`);
         steps.push('Zamieszaj delikatnie');
-        steps.push(`Za\u0142\u00F3\u017C t\u0142ok (nie wciskaj) i odczekaj ${recipe.brewTime} min`);
-        steps.push('Powoli wci\u015Bnij t\u0142ok do dna');
+        steps.push(`Załóż tłok (nie wciskaj) i odczekaj ${recipe.brewTime} min`);
+        steps.push('Powoli wciśnij tłok do dna');
 
         if (!needsMilk) {
-            if (state.cupCount === 1) {
+            if (recipe.cups.length === 1) {
                 const cup = recipe.cups[0];
                 if (cup.type === 'czarna') {
-                    steps.push('Przelej kaw\u0119 do fili\u017Canki');
+                    steps.push('Przelej kawę do filiżanki');
                 } else {
                     steps.push(
-                        `Przelej ${cup.baseMl} ml kawy do fili\u017Canki i dolej ` +
-                        `${cup.waterMl} ml gor\u0105cej wody`
+                        `Przelej ${cup.baseMl} ml kawy do filiżanki i dolej ` +
+                        `${cup.waterMl} ml gorącej wody`
                     );
                 }
             } else {
                 for (const c of recipe.cups) {
-                    let line = `Fili\u017Canka ${c.index} (${c.typeLabel}): przelej ${c.baseMl} ml bazy`;
-                    if (c.waterMl > 0) line += ` + dolej ${c.waterMl} ml gor\u0105cej wody`;
+                    let line = `Filiżanka ${c.index} (${c.typeLabel}): przelej ${c.baseMl} ml bazy`;
+                    if (c.waterMl > 0) line += ` + dolej ${c.waterMl} ml gorącej wody`;
                     steps.push(line);
                 }
             }
         } else {
-            if (state.cupCount === 1) {
+            if (recipe.cups.length === 1) {
                 const cup = recipe.cups[0];
-                steps.push(`Przelej ${cup.baseMl} ml kawy do fili\u017Canki`);
+                steps.push(`Przelej ${cup.baseMl} ml kawy do filiżanki`);
             } else {
                 const pourParts = recipe.cups.map((c) => {
                     let part = `fil. ${c.index}: ${c.baseMl} ml`;
                     if (c.waterMl > 0) part += ` + ${c.waterMl} ml wody`;
                     return part;
                 });
-                steps.push(`Rozlej baz\u0119 kawy do fili\u017Canek \u2014 ${pourParts.join(', ')}`);
+                steps.push(`Rozlej bazę kawy do filiżanek — ${pourParts.join(', ')}`);
             }
 
             steps.push(
-                'Przelej podgrzane mleko do French Pressa (max do po\u0142owy) ' +
-                'i energicznie pompuj t\u0142okiem przez 10\u201315 sek, a\u017C mleko podwoi obj\u0119to\u015B\u0107'
+                'Przelej podgrzane mleko do French Pressa (max do połowy) ' +
+                'i energicznie pompuj tłokiem przez 10–15 sek, aż mleko podwoi objętość'
             );
 
-            if (state.cupCount === 1) {
+            if (recipe.cups.length === 1) {
                 const cup = recipe.cups[0];
-                let milkLine = 'Dodaj do fili\u017Canki';
+                let milkLine = 'Dodaj do filiżanki';
                 if (cup.milkMl > 0) milkLine += ` ${cup.milkMl} ml spieninego mleka`;
                 if (cup.foamMl > 0) milkLine += `${cup.milkMl > 0 ? ' i ' : ' '}${cup.foamMl} ml pianki`;
                 steps.push(milkLine);
             } else {
                 for (const c of recipe.cups) {
                     if (c.milkMl > 0 || c.foamMl > 0) {
-                        let line = `Fili\u017Canka ${c.index} (${c.typeLabel}): dodaj`;
+                        let line = `Filiżanka ${c.index} (${c.typeLabel}): dodaj`;
                         if (c.milkMl > 0) line += ` ${c.milkMl} ml mleka`;
                         if (c.foamMl > 0) line += `${c.milkMl > 0 ? ' i ' : ' '}${c.foamMl} ml pianki`;
                         steps.push(line);
@@ -618,7 +623,7 @@
             }
         }
 
-        steps.push('Gotowe \u2014 smacznej kawy! \u2615');
+        steps.push('Gotowe — smacznej kawy! ☕');
         return steps;
     };
 
@@ -659,17 +664,17 @@
                 cls: 'bloom',
                 icon: '\uD83E\uDEE7',
                 title: 'Blooming',
-                text: 'Zalewanie kawy niewielk\u0105 ilo\u015Bci\u0105 wody uwalnia CO\u2082 uwi\u0119ziony ' +
-                      'podczas palenia ziaren. Je\u015Bli widzisz b\u0105belki na powierzchni \u2014 Twoja ' +
-                      'kawa jest \u015Bwie\u017Ca! Blooming poprawia ekstrakcj\u0119 i daje pe\u0142niejszy smak.'
+                text: 'Zalewanie kawy niewielką ilością wody uwalnia CO₂ uwięziony ' +
+                      'podczas palenia ziaren. Jeśli widzisz bąbelki na powierzchni — Twoja ' +
+                      'kawa jest świeża! Blooming poprawia ekstrakcję i daje pełniejszy smak.'
             },
             {
                 cls: 'temp',
                 icon: '\uD83C\uDF21\uFE0F',
                 title: 'Temperatura',
-                text: 'Optymalna temperatura parzenia to 93\u201396\u00B0C. Wrzatek parzy kaw\u0119 ' +
-                      'zbyt intensywnie (gorzki smak), a za zimna woda da s\u0142ab\u0105, ' +
-                      'kwa\u015Bn\u0105 ekstrakcj\u0119. Wystarczy odczeka\u0107 ok. 1 min po zagotowaniu.'
+                text: 'Optymalna temperatura parzenia to 93–96°C. Wrzatek parzy kawę ' +
+                      'zbyt intensywnie (gorzki smak), a za zimna woda da słabą, ' +
+                      'kwaśną ekstrakcję. Wystarczy odczekać ok. 1 min po zagotowaniu.'
             }
         ];
 
@@ -678,20 +683,20 @@
                 cls: 'milk',
                 icon: '\uD83E\uDD5B',
                 title: 'Spienianie mleka',
-                text: 'French Press \u015Bwietnie sprawdza si\u0119 jako spieniacz! Podgrzej mleko ' +
-                      'do ok. 60\u00B0C (nie gotuj \u2014 powy\u017Cej 70\u00B0C bia\u0142ka si\u0119 rozpadaj\u0105), ' +
-                      'przelej do prasy max do po\u0142owy i energicznie pompuj t\u0142okiem. ' +
-                      'Mleko podwoi obj\u0119to\u015B\u0107 w 10\u201315 sekund.'
+                text: 'French Press świetnie sprawdza się jako spieniacz! Podgrzej mleko ' +
+                      'do ok. 60°C (nie gotuj — powyżej 70°C białka się rozpadają), ' +
+                      'przelej do prasy max do połowy i energicznie pompuj tłokiem. ' +
+                      'Mleko podwoi objętość w 10–15 sekund.'
             });
         }
 
         tips.push({
             cls: 'grind',
-            icon: '\u2699\uFE0F',
-            title: 'Stopie\u0144 mielenia',
-            text: 'Do French Pressa u\u017Cywaj grubo mielonej kawy (jak gruby piasek). ' +
-                  'Zbyt drobne mielenie sprawi, \u017Ce kawa przejdzie przez filtr siatkowy ' +
-                  'i nap\u00F3j b\u0119dzie m\u0119tny i przeparzony.'
+            icon: '⚙',
+            title: 'Stopień mielenia',
+            text: 'Do French Pressa używaj grubo mielonej kawy (jak gruby piasek). ' +
+                  'Zbyt drobne mielenie sprawi, że kawa przejdzie przez filtr siatkowy ' +
+                  'i napój będzie mętny i przeparzony.'
         });
 
         let html = '<h3>Dobre praktyki</h3>';
@@ -777,14 +782,17 @@
         }
     };
 
+    let audioCtx = null;
     const timerBeep = () => {
         try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
             const beep = (freq, startTime, duration) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
                 osc.connect(gain);
-                gain.connect(ctx.destination);
+                gain.connect(audioCtx.destination);
                 osc.frequency.value = freq;
                 osc.type = 'sine';
                 gain.gain.setValueAtTime(0.3, startTime);
@@ -792,7 +800,7 @@
                 osc.start(startTime);
                 osc.stop(startTime + duration);
             };
-            const now = ctx.currentTime;
+            const now = audioCtx.currentTime;
             beep(880, now, 0.15);
             beep(880, now + 0.2, 0.15);
             beep(1100, now + 0.4, 0.25);
@@ -919,7 +927,7 @@
         }
         const icons = state.cups.map((c) => COFFEE_TYPES[c.type].icon).join('');
         const uniqueTypes = [...new Set(state.cups.map((c) => COFFEE_TYPES[c.type].label))];
-        const summary = uniqueTypes.length === 1 ? uniqueTypes[0] : `${state.cupCount} filiżanki`;
+        const summary = uniqueTypes.length === 1 ? uniqueTypes[0] : `${state.cupCount} ${pluralizeCups(state.cupCount)}`;
         return `${icons} ${summary}`;
     };
 
@@ -935,6 +943,11 @@
         if (toastTimer) clearTimeout(toastTimer);
         toastTimer = setTimeout(() => toastEl.classList.remove('toast-show'), 2500);
     };
+
+    const isSameRecipe = (fav) =>
+        fav.strength === state.strength &&
+        fav.cupCount === state.cupCount &&
+        fav.cups.every((c, i) => state.cups[i] && c.type === state.cups[i].type && c.size === state.cups[i].size);
 
     const deleteFavorite = (id) => {
         saveFavorites(loadFavorites().filter((f) => f.id !== id));
@@ -974,11 +987,11 @@
                 `<div class="fav-item">` +
                     `<div class="fav-info">` +
                         `<div class="fav-label">${fav.label}</div>` +
-                        `<div class="fav-meta">${fav.strengthLabel} \u00b7 ${formatFavDate(fav.date)}</div>` +
+                        `<div class="fav-meta">${fav.strengthLabel} · ${formatFavDate(fav.date)}</div>` +
                     `</div>` +
                     `<div class="fav-actions">` +
-                        `<button type="button" class="btn-fav-load" data-id="${fav.id}">Za\u0142aduj</button>` +
-                        `<button type="button" class="btn-fav-del" data-id="${fav.id}" aria-label="Usu\u0144">\u00d7</button>` +
+                        `<button type="button" class="btn-fav-load" data-id="${fav.id}">Załaduj</button>` +
+                        `<button type="button" class="btn-fav-del" data-id="${fav.id}" aria-label="Usuń">×</button>` +
                     `</div>` +
                 `</div>`;
         }
@@ -1000,11 +1013,15 @@
 
     document.getElementById('favorites-toggle').addEventListener('click', () => {
         const isOpen = favoritesPanel.classList.toggle('favorites-open');
-        document.getElementById('favorites-chevron').textContent = isOpen ? '\u25b2' : '\u25bc';
+        favoritesChevron.textContent = isOpen ? '▲' : '▼';
     });
 
     const saveBtnEl = document.getElementById('save-btn');
     saveBtnEl.addEventListener('click', () => {
+        if (loadFavorites().some(isSameRecipe)) {
+            showToast('Ten przepis jest już zapisany ⭐');
+            return;
+        }
         const newFav = {
             id: Date.now(),
             label: generateFavoriteLabel(),
@@ -1019,11 +1036,11 @@
         if (favs.length > 20) favs.length = 20;
         saveFavorites(favs);
         renderFavoritesList();
-        showToast('Przepis zapisany \u2b50');
-        saveBtnEl.textContent = 'Zapisano \u2713';
+        showToast('Przepis zapisany ⭐');
+        saveBtnEl.textContent = 'Zapisano ✓';
         saveBtnEl.disabled = true;
         setTimeout(() => {
-            saveBtnEl.textContent = 'Zapisz \u2b50';
+            saveBtnEl.textContent = 'Zapisz ⭐';
             saveBtnEl.disabled = false;
         }, 2000);
     });
