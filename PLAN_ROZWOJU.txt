@@ -3,7 +3,8 @@
 ================================================================================
 
 Data utworzenia: 2026-02-12
-Wersja aplikacji: 1.1
+Ostatnia aktualizacja: 2026-02-26
+Wersja aplikacji: 1.2
 Stack: HTML + CSS + vanilla JavaScript ES6+ (bez frameworkow)
 Linter: ESLint 10 (eslint.config.mjs)
 Hosting: GitHub Pages (static.yml)
@@ -21,7 +22,7 @@ Uzytkownik przechodzi przez 4-krokowy wizard:
   Krok 4 — Moc kawy (slaba, srednia, mocna)
 
 Wynik: szczegolowy przepis z krokami, proporcjami, bloomingiem,
-spienianiem mleka i poradami.
+spienianiem mleka i poradami. Dziala offline (PWA).
 
 ================================================================================
   2. STRUKTURA PLIKOW
@@ -31,6 +32,9 @@ spienianiem mleka i poradami.
   ├── index.html          Glowny plik HTML (wizard + recipe + timer)
   ├── style.css           Style (responsywne, mobile-first)
   ├── app.js              Logika aplikacji (ES6+ IIFE, bez zaleznosci)
+  ├── manifest.json       PWA manifest (nazwa, ikona, kolory, standalone)
+  ├── sw.js               Service Worker (cache-first, offline)
+  ├── icon.svg            Ikona aplikacji (PWA, apple-touch-icon)
   ├── eslint.config.mjs   Konfiguracja ESLint (flat config)
   ├── package.json        npm — devDependencies: eslint
   ├── .github/
@@ -52,26 +56,54 @@ spienianiem mleka i poradami.
 
 [x] Zapisywanie ulubionych przepisow (localStorage) (zrealizowano 2026-02-26)
     - Przycisk "Zapisz przepis" na ekranie wyniku
-    - Lista zapisanych przepisow dostepna z ekranu glownego
+    - Lista zapisanych przepisow (accordion) dostepna z ekranu glownego
     - Mozliwosc usuwania zapisanych przepisow
+    - Toast notification po zapisaniu, max 20 przepisow
 
 [x] Tryb offline (PWA) (zrealizowano 2026-02-26)
-    - Manifest.json + Service Worker
-    - Mozliwosc instalacji na telefonie
+    - Manifest.json + Service Worker (cache-first)
+    - Mozliwosc instalacji na telefonie (beforeinstallprompt)
     - Pelna funkcjonalnosc bez internetu
-
---- PRIORYTET SREDNI ---
-
+    UWAGA: przy kazdym deploy na GitHub Pages naley zbumpowac
+    CACHE_NAME w sw.js (np. kawusiomat-v2, v3...) aby uzytkownicy
+    dostali nowe pliki — bez tego SW serwuje stary cache!
 
 [ ] Tryb ciemny
-    - Przelacznik jasny/ciemny
+    - Przelacznik jasny/ciemny w naglowku
     - Respektowanie preferencji systemowych (prefers-color-scheme)
     - Zapisanie wyboru w localStorage
 
+[ ] Powtorz ostatni przepis (1 klikniecie)
+    - Przycisk "Parze znowu" na ekranie przepisu — resetuje timer
+      i ponownie pokazuje ten sam przepis bez przechodzenia przez wizard
+    - Alternatywnie: "Ostatnio parzona" jako skrot na ekranie glownym
+      jesli uzytkownik zamknal aplikacje miedzy parzeniami
+    Uzasadnienie: najczestszy use case to powtarzanie tej samej kawy
+    rano. Przejscie przez 4 kroki wizarda jest redundantne.
+
+--- PRIORYTET SREDNI ---
+
 [ ] Udostepnianie przepisu
     - Przycisk "Udostepnij" generujacy link z parametrami w URL
+      (np. ?cups=1&size=250&type=czarna&strength=medium)
     - Kopiowanie przepisu jako tekst do schowka
-    - Opcjonalnie: Web Share API na urzadzeniach mobilnych
+    - Web Share API na urzadzeniach mobilnych (navigator.share)
+
+[ ] Zmiana nazwy ulubionego przepisu
+    - Inline edit po kliknieciu w nazwe przepisu na liscie ulubionych
+    - Domyslna nazwa generowana automatycznie, ale uzytkownik moze
+      nadac swoja (np. "Poranna mocna", "Dla gosci")
+    - Zapis w tym samym obiekcie w localStorage
+
+[ ] Potwierdzenie usuwania ulubionego
+    - Zamiast natychmiastowego usuniecia: inline "Usunac? Tak / Nie"
+    - Lub przycisk "Cofnij" w tostcie przez 5 sekund (undo pattern)
+
+[ ] Customizable czas parzenia
+    - Mozliwosc nadpisania domyslnego czasu (3/4/5 min) przez uzytkownika
+    - Przyciski +/- lub suwak na ekranie kroku 4 lub bezposrednio
+      w sekcji timera na ekranie przepisu
+    - Preferencja zapisana w ulubionym jesli uzytkownik zapisuje przepis
 
 --- PRIORYTET NISKI ---
 
@@ -81,8 +113,9 @@ spienianiem mleka i poradami.
     - Przelacznik jezyka w naglowku
 
 [ ] Historia parzen
-    - Automatyczne logowanie kazdego wygenerowanego przepisu
+    - Automatyczne logowanie kazdego wygenerowanego przepisu z data
     - Statystyki: ile kaw zaparzono, ulubiony rodzaj, srednia moc
+    - Prosta lista z datami (nie wymaga backendu — localStorage)
 
 [x] Animacje i mikrointerakcje (zrealizowano 2026-02-12)
     - Animacja parzenia kawy (pour + fill + steam) na ekranie przepisu
@@ -93,9 +126,19 @@ spienianiem mleka i poradami.
     - Bounce na checkboxie krokow przy zaznaczeniu "done"
 
 [ ] Kalkulator kosztow
-    - Cena za kg kawy i litr mleka
+    - Cena za kg kawy i litr mleka (wpisywane przez uzytkownika)
     - Obliczanie kosztu jednej filizanki
-    - Porownanie z kawiarnia
+    - Porownanie z kawiarnia (srednia cena kawy w Polsce ~15 zl)
+
+[ ] Eksport / Import ulubionych (JSON)
+    - Przycisk "Eksportuj" pobiera plik kawusiomat-favorites.json
+    - Przycisk "Importuj" wczytuje plik i scala z istniejacymi
+    - Umozliwia backup i przeniesienie na inne urzadzenie
+
+[ ] Sugestia rozmiaru French Pressa
+    - Na podstawie totalBaseWater pokaz jaki French Press jest potrzebny:
+      300 ml / 500 ml / 1000 ml (wlaczajac zapas na fusy i piane)
+    - Maly diagram lub chip w sekcji summary
 
 ================================================================================
   4. PLAN UTRZYMANIA
@@ -134,12 +177,14 @@ spienianiem mleka i poradami.
     - Semantic versioning (MAJOR.MINOR.PATCH)
     - Changelog (CHANGELOG.md) przy wiekszych zmianach
     - Git tags dla wersji
+    - Automatyczne bump CACHE_NAME w sw.js jako czesc procesu release
 
 --- WYDAJNOSC ---
 
 [ ] Minifikacja CSS i JS (np. esbuild, terser)
-[ ] Kompresja obrazkow jesli zostana dodane
 [ ] Audit Lighthouse — cel: 100/100 we wszystkich kategoriach
+    Aktualny status po dodaniu PWA: do sprawdzenia (manifest OK,
+    SW OK, brak ikony maskable moze obnizac score)
 
 --- DOSTEPNOSC (a11y) ---
 
@@ -156,19 +201,80 @@ spienianiem mleka i poradami.
 [ ] Regularne aktualizacje zaleznosci (jesli zostana dodane)
 
 ================================================================================
-  5. ZNANE BLEDY — NAPRAWIONE
+  5. CODE REVIEW — ZNALEZIONE PROBLEMY (do naprawy)
+================================================================================
+
+--- BLEDY / DEAD CODE ---
+
+[ ] state.currentStep — dead code
+    - Pole ustawiane w showStep() ale nigdzie nie odczytywane
+    - Usunac z obiektu state i z funkcji showStep
+    - Linie: 64 (state def), 118 (showStep)
+
+[ ] generateSteps() czyta state.cupCount bezposrednio
+    - Linie 568 i 586 uzywa state.cupCount zamiast recipe.cups.length
+    - Ukryta zaleznosc od globalnego stanu zamiast od przekazanego obiektu
+    - Poprawic: zastapic state.cupCount na recipe.cups.length
+
+[ ] Gramatyka PL w generateFavoriteLabel()
+    - "${n} filizanki" jest poprawne dla 2-4, blad dla 5-6
+    - Poprawic: dodac funkcje pl(n) -> "filizanka" / "filizanki" / "filizanek"
+
+[ ] Brak deduplikacji przy zapisie ulubionych
+    - Mozna zapisac ten sam przepis wielokrotnie klikajac "Zapisz"
+    - Rozwiazanie: porownac cups/strength/cupCount przy zapisie
+
+--- DROBNE PROBLEMY ---
+
+[ ] timerBeep() tworzy nowy AudioContext przy kazdym wywolaniu
+    - Chrome ma limit ~6 instancji AudioContext
+    - W praktyce nieszkodliwe (max 2 beepy/sesje), ale warto naprawic
+    - Poprawic: stworzyc ctx raz przy starcie (leniwa inicjalizacja
+      przy pierwszym wywolaniu timerBeep, nie przy starcie IIFE)
+
+[ ] favorites-chevron query w event handlerze
+    - document.getElementById('favorites-chevron') wywolywane przy
+      kazdym kliknieciu zamiast uzywac cached ref z DOM REFS sekcji
+    - Linia 1003: dodac const favoritesChevron do sekcji DOM REFS
+
+[ ] Kodowanie znakow w app.js — niekonsekwentne
+    - Polskie znaki zapisane jako \u0142, \u015B itp. zamiast UTF-8
+    - index.html uzywa UTF-8 bezposrednio, app.js uzywa escape sequences
+    - Poprawic: zmienic encoding pliku i zapisac znaki bezposrednio
+
+--- PWA ---
+
+[ ] Brak ikony maskable dla Android adaptive icons
+    - Bez purpose:"maskable" Chrome dodaje biale tlo wokol ikony
+    - Stworzyc icon-maskable.svg (ta sama grafika + 10% padding)
+    - Dodac wpis do manifest.json z purpose:"maskable"
+
+[ ] Strategia bump CACHE_NAME przy deploy
+    - Aktualnie: kawusiomat-v1 — wymaga recznej zmiany
+    - Opcja A: skrypt npm "predeploy" bump'ujacy wersje w sw.js
+    - Opcja B: sw.js pobiera wersje z meta tagu w index.html
+    - Opcja C: uzyc workbox (ale to dodatkowa zaleznosc)
+
+================================================================================
+  6. ZNANE BLEDY — NAPRAWIONE
 ================================================================================
 
 [x] Mozliwosc zaznaczenia wielu rozmiarow w jednej filizance
     - Przyczyna: closure w petli for+var lapalo zmienna 'group'
       przez referencje — po petli wskazywala na ostatnia grupe
-    - Naprawiono: przekazanie 'group' jako parametr IIFE (pozniej migracja
-      na ES6+ let/const calkowicie wyeliminowala te klase bledow)
-    - Dotyczylo: renderCupSizes() i renderCupTypes()
+    - Naprawiono: migracja na ES6+ let/const
     - Data naprawy: 2026-02-12
 
+[x] Zla ilosc naparu — aplikacja nie uwzgledniala absorpcji wody
+    - Przyczyna: totalBaseWater == targetBrewVolume, a fusy
+      pochlaniaja ~2 ml wody/g kawy (standard SCA)
+    - Efekt: dla 250 ml filiżanki, ratio=14 uzytkownik dostawal
+      ~214 ml naparu zamiast 250 ml
+    - Naprawiono: waterNeeded = targetBrew * ratio / (ratio - 2)
+    - Data naprawy: 2026-02-26
+
 ================================================================================
-  6. KONWENCJE PROJEKTU
+  7. KONWENCJE PROJEKTU
 ================================================================================
 
 - Jezyk interfejsu: polski
@@ -179,9 +285,10 @@ spienianiem mleka i poradami.
 - Mobile-first, responsywny CSS
 - Brak build stepu — pliki serwowane bezposrednio
 - Lint: npm run lint (0 errors wymagane przed commitem)
+- PWA: po kazdym deploy zbumpowac CACHE_NAME w sw.js
 
 ================================================================================
-  7. KONTAKTY I ZASOBY
+  8. KONTAKTY I ZASOBY
 ================================================================================
 
 Repozytorium: GitHub (branch: main)
