@@ -1190,6 +1190,50 @@ header h1 {
     display: none;
 }
 
+/* iOS install banner */
+
+.ios-install-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.9rem;
+    background: #fff8f2;
+    border: 1.5px solid var(--accent);
+    border-radius: 12px;
+    font-size: 0.82rem;
+    color: var(--text);
+    position: relative;
+}
+
+.ios-share-icon {
+    width: 1rem;
+    height: 1rem;
+    color: #007aff;
+    flex-shrink: 0;
+}
+
+.ios-banner-close {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.4rem;
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+[data-theme="modern"] .ios-install-banner {
+    background: #111;
+    border-color: #555;
+    color: #eee;
+}
+
 /* Footer */
 
 footer {

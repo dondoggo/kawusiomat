@@ -1155,6 +1155,18 @@
         pwaInstallPrompt = null;
     });
 
+    // iOS Safari — brak beforeinstallprompt, pokazujemy ręczną instrukcję
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = navigator.standalone === true;
+    const iosBannerDismissed = sessionStorage.getItem('ios_banner_dismissed');
+    if (isIos && !isStandalone && !iosBannerDismissed) {
+        document.getElementById('ios-install-banner').classList.remove('hidden');
+    }
+    document.getElementById('ios-banner-close').addEventListener('click', () => {
+        document.getElementById('ios-install-banner').classList.add('hidden');
+        sessionStorage.setItem('ios_banner_dismissed', '1');
+    });
+
     // ========================
     // THEME
     // ========================
