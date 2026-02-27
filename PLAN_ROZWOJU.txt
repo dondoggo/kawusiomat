@@ -3,7 +3,7 @@
 ================================================================================
 
 Data utworzenia: 2026-02-12
-Ostatnia aktualizacja: 2026-02-27 (2)
+Ostatnia aktualizacja: 2026-02-27 (3)
 Wersja aplikacji: 1.2
 Stack: HTML + CSS + vanilla JavaScript ES6+ (bez frameworkow)
 Linter: ESLint 10 (eslint.config.mjs)
@@ -62,11 +62,22 @@ spienianiem mleka i poradami. Dziala offline (PWA).
 
 [x] Tryb offline (PWA) (zrealizowano 2026-02-26)
     - Manifest.json + Service Worker (cache-first)
-    - Mozliwosc instalacji na telefonie (beforeinstallprompt)
+    - Mozliwosc instalacji na telefonie (beforeinstallprompt — Android/Chrome)
     - Pelna funkcjonalnosc bez internetu
     UWAGA: przy kazdym deploy na GitHub Pages naley zbumpowac
     CACHE_NAME w sw.js (np. kawusiomat-v2, v3...) aby uzytkownicy
     dostali nowe pliki — bez tego SW serwuje stary cache!
+
+[x] Banner instalacji PWA dla iOS Safari (zrealizowano 2026-02-27)
+    - iOS Safari nigdy nie odpala zdarzenia beforeinstallprompt,
+      wiec oryginalny przycisk instalacji byl tam na zawsze ukryty
+    - Dodano banner z reczna instrukcja: "Tapnij [ikona Share] →
+      Dodaj do ekranu głównego"
+    - Wykrywanie: /iphone|ipad|ipod/i + navigator.standalone !== true
+    - Przycisk X zamyka banner i zapisuje odrzucenie w sessionStorage
+      (nie pokazuje sie ponownie w tej samej sesji)
+    - Kompatybilnosc: Android/Chrome — bez zmian (beforeinstallprompt
+      działa jak poprzednio)
 
 [x] Drugi motyw: Nowoczesny (zrealizowano 2026-02-27)
     - Inspiracja: foundationcoffee.pl — czerń, biel, niebieski #0046ff
