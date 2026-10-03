@@ -1188,7 +1188,7 @@
 
     const updateThemeBtn = () => {
         const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
-        themeColorMeta.setAttribute('content', isModern ? '#f2f2f2' : '#6f4e37');
+        themeColorMeta.setAttribute('content', isModern ? '#f2f2f2' : '#4a2c1d');
         themeToggleBtn.title = isModern
             ? 'Motyw: Nowoczesny — kliknij, aby przełączyć na Klasyczny'
             : 'Motyw: Klasyczny — kliknij, aby przełączyć na Nowoczesny';

@@ -1514,3 +1514,426 @@ footer {
         text-align: center;
     }
 }
+
+/* ==========================================================
+   RETRO (motyw klasyczny): kawiarnia z lat 70.
+   Wszystko ograniczone do :not([data-theme="modern"]),
+   więc motyw nowoczesny zostaje bez zmian.
+   ========================================================== */
+
+html:not([data-theme="modern"]) {
+    --bg: #f4e8cf;
+    --accent: #4a2c1d;
+    --accent-light: #b98a5e;
+    --text: #3a2418;
+    --white: #fffaf0;
+    --retro-orange: #d9692b;
+    --retro-mustard: #e8a33d;
+    --retro-teal: #2f6f6a;
+    --retro-cream: #fffaf0;
+    --retro-ink: #3a2418;
+    --done: var(--retro-teal);
+    --done-bg: #e3efe9;
+    --shadow: 4px 4px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E"),
+        repeating-conic-gradient(from 0deg at 50% -10%, rgba(232, 163, 61, 0.07) 0deg 8deg, transparent 8deg 16deg);
+    background-attachment: fixed;
+}
+
+html:not([data-theme="modern"]) h1,
+html:not([data-theme="modern"]) h2,
+html:not([data-theme="modern"]) h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.01em;
+}
+
+/* Nagłówek z tęczowymi pasami */
+html:not([data-theme="modern"]) header h1 {
+    font-family: 'Shrikhand', 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    font-size: 2.6rem;
+    color: var(--retro-orange);
+    text-shadow: 3px 3px 0 var(--retro-ink);
+    line-height: 1.1;
+    animation: retroTitleIn 0.7s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+
+html:not([data-theme="modern"]) header h1::after {
+    content: '';
+    display: block;
+    width: 140px;
+    height: 18px;
+    margin: 0.6rem auto 0;
+    border-radius: 9px;
+    background: linear-gradient(var(--retro-mustard) 0 33%, var(--retro-orange) 33% 66%, var(--retro-teal) 66% 100%);
+    box-shadow: 2px 2px 0 var(--retro-ink);
+    transform-origin: center;
+    animation: retroStripes 0.8s 0.2s cubic-bezier(.2, 1.2, .4, 1) both;
+}
+
+html:not([data-theme="modern"]) .subtitle {
+    color: var(--retro-ink);
+    font-style: italic;
+    opacity: 0.75;
+    margin-top: 0.5rem;
+}
+
+/* Pasek postępu */
+html:not([data-theme="modern"]) .progress-bar {
+    height: 12px;
+    background: var(--retro-cream);
+    border: 2px solid var(--retro-ink);
+    border-radius: 8px;
+}
+
+html:not([data-theme="modern"]) .progress-fill {
+    border-radius: 0;
+    background: repeating-linear-gradient(-45deg, var(--retro-orange) 0 8px, var(--retro-mustard) 8px 16px);
+    background-size: 22.6px 22.6px;
+    animation: retroBarberPole 1s linear infinite;
+}
+
+html:not([data-theme="modern"]) .progress-dot { opacity: 0.55; }
+html:not([data-theme="modern"]) .progress-dot.current,
+html:not([data-theme="modern"]) .progress-dot.done { opacity: 1; }
+
+html:not([data-theme="modern"]) .dot-number {
+    width: 32px;
+    height: 32px;
+    background: var(--retro-cream);
+    border: 2px solid var(--retro-ink);
+    color: var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .progress-dot.current .dot-number {
+    background: var(--retro-orange);
+    color: var(--retro-cream);
+    box-shadow: 2px 2px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .progress-dot.done .dot-number {
+    background: var(--retro-teal);
+    color: var(--retro-cream);
+}
+
+html:not([data-theme="modern"]) .dot-label {
+    color: var(--retro-ink);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* Karty */
+html:not([data-theme="modern"]) .card,
+html:not([data-theme="modern"]) .favorites-panel {
+    background: var(--retro-cream);
+    border: 2.5px solid var(--retro-ink);
+    border-radius: 20px;
+    box-shadow: 6px 6px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .card h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--retro-ink);
+    padding-bottom: 0.6rem;
+    border-bottom: 2px dashed var(--accent-light);
+}
+
+html:not([data-theme="modern"]) .card h3 { color: var(--retro-ink); }
+
+html:not([data-theme="modern"]) .cup-config,
+html:not([data-theme="modern"]) .cup-breakdown {
+    background: #fbf0dc;
+    border: 2px solid var(--retro-ink);
+    border-radius: 14px;
+}
+
+/* Przyciski wyboru */
+html:not([data-theme="modern"]) .button-group { gap: 0.6rem; }
+
+html:not([data-theme="modern"]) .button-group button {
+    min-height: 48px;
+    border: 2px solid var(--retro-ink);
+    border-radius: 12px;
+    background: var(--retro-cream);
+    color: var(--retro-ink);
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 3px 3px 0 var(--retro-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.2s ease;
+}
+
+html:not([data-theme="modern"]) .button-group button:hover {
+    background: #fdf1d8;
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .button-group button.active {
+    background: var(--retro-mustard);
+    color: var(--retro-ink);
+    border-color: var(--retro-ink);
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .coffee-type button.active .type-icon {
+    animation: retroWiggle 0.5s ease;
+}
+
+/* Przyciski akcji: wciskane jak klawisze */
+html:not([data-theme="modern"]) .btn-next,
+html:not([data-theme="modern"]) .btn-brew,
+html:not([data-theme="modern"]) .timer-btn {
+    background: var(--retro-orange);
+    color: var(--retro-cream);
+    border: 2.5px solid var(--retro-ink);
+    border-radius: 999px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow: 4px 4px 0 var(--retro-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.2s ease;
+}
+
+html:not([data-theme="modern"]) .btn-next:hover,
+html:not([data-theme="modern"]) .btn-brew:hover,
+html:not([data-theme="modern"]) .timer-btn:hover {
+    background: #c85a1f;
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .btn-next:active,
+html:not([data-theme="modern"]) .btn-brew:active,
+html:not([data-theme="modern"]) .timer-btn:active,
+html:not([data-theme="modern"]) .btn-back-step:active,
+html:not([data-theme="modern"]) .btn-back:active,
+html:not([data-theme="modern"]) .btn-save:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .btn-brew {
+    background: var(--retro-teal);
+    animation: retroGlow 2.4s ease-in-out infinite;
+}
+
+html:not([data-theme="modern"]) .btn-brew:hover { background: #255b57; }
+
+html:not([data-theme="modern"]) .timer-btn-secondary,
+html:not([data-theme="modern"]) .btn-back-step,
+html:not([data-theme="modern"]) .btn-back {
+    background: var(--retro-cream);
+    color: var(--retro-ink);
+    border: 2.5px solid var(--retro-ink);
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 4px 4px 0 var(--retro-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+html:not([data-theme="modern"]) .timer-btn-secondary:hover,
+html:not([data-theme="modern"]) .btn-back-step:hover,
+html:not([data-theme="modern"]) .btn-back:hover {
+    background: #fdf1d8;
+}
+
+html:not([data-theme="modern"]) .btn-save {
+    background: var(--retro-mustard);
+    color: var(--retro-ink);
+    border: 2.5px solid var(--retro-ink);
+    border-radius: 999px;
+    font-weight: 800;
+    box-shadow: 4px 4px 0 var(--retro-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+html:not([data-theme="modern"]) .btn-save:hover { background: #f0b552; }
+
+/* Podsumowanie przepisu */
+html:not([data-theme="modern"]) .summary-item {
+    background: var(--retro-cream);
+    border: 2px solid var(--retro-ink);
+    border-radius: 14px;
+    box-shadow: 3px 3px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .summary-item:nth-child(4n+1) { background: #fde3c6; }
+html:not([data-theme="modern"]) .summary-item:nth-child(4n+2) { background: #fbeab8; }
+html:not([data-theme="modern"]) .summary-item:nth-child(4n+3) { background: #d6ebe3; }
+
+html:not([data-theme="modern"]) .summary-value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 800;
+    color: var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .summary-label {
+    color: var(--retro-ink);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.75;
+}
+
+html:not([data-theme="modern"]) .detail-chip {
+    border: 1.5px solid var(--retro-ink);
+    font-weight: 700;
+}
+
+/* Kroki */
+html:not([data-theme="modern"]) .steps-list li {
+    border-bottom: 2px dashed #e3cfae;
+    transition: background 0.2s ease;
+}
+
+html:not([data-theme="modern"]) .steps-list li:hover { background: #fbf0dc; }
+
+html:not([data-theme="modern"]) .step-checkbox {
+    border: 2px solid var(--retro-ink);
+    border-radius: 7px;
+    background: var(--retro-cream);
+}
+
+html:not([data-theme="modern"]) .steps-list li.done .step-checkbox {
+    background: var(--retro-teal);
+    border-color: var(--retro-ink);
+}
+
+/* Porady */
+html:not([data-theme="modern"]) .info-bar {
+    border: 2px solid var(--retro-ink);
+    border-radius: 14px;
+    box-shadow: 3px 3px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .info-bar.bloom { background: #fbeab8; }
+html:not([data-theme="modern"]) .info-bar.temp { background: #fde3c6; }
+html:not([data-theme="modern"]) .info-bar.milk { background: var(--retro-cream); }
+html:not([data-theme="modern"]) .info-bar.grind { background: #d6ebe3; }
+
+/* Minutnik */
+html:not([data-theme="modern"]) .timer-section {
+    background: #fbf0dc;
+    border: 2px solid var(--retro-ink);
+    border-radius: 18px;
+}
+
+html:not([data-theme="modern"]) .timer-ring-bg { stroke: #e3cfae; }
+html:not([data-theme="modern"]) .timer-ring-progress.blooming { stroke: var(--retro-mustard); }
+html:not([data-theme="modern"]) .timer-ring-progress.brewing { stroke: var(--retro-orange); }
+html:not([data-theme="modern"]) .timer-ring-progress.done { stroke: var(--retro-teal); }
+
+html:not([data-theme="modern"]) .timer-time {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    color: var(--retro-ink);
+}
+
+/* Ulubione, toast, drobiazgi */
+html:not([data-theme="modern"]) .favorites-badge {
+    background: var(--retro-orange);
+    color: var(--retro-cream);
+    border: 2px solid var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) .btn-fav-load {
+    background: var(--retro-teal);
+    color: var(--retro-cream);
+    border: 2px solid var(--retro-ink);
+    border-radius: 999px;
+}
+
+html:not([data-theme="modern"]) .toast {
+    background: var(--retro-ink);
+    color: var(--retro-cream);
+    border: 2px solid var(--retro-mustard);
+    border-radius: 999px;
+    box-shadow: 4px 4px 0 var(--retro-mustard);
+}
+
+html:not([data-theme="modern"]) .theme-toggle-btn,
+html:not([data-theme="modern"]) .pwa-install-btn {
+    background: var(--retro-cream);
+    color: var(--retro-ink);
+    border: 2px solid var(--retro-ink);
+    box-shadow: 2px 2px 0 var(--retro-ink);
+}
+
+html:not([data-theme="modern"]) footer {
+    color: var(--retro-ink);
+    opacity: 0.7;
+    font-style: italic;
+}
+
+html:not([data-theme="modern"]) .card-enter {
+    animation: retroCardIn 0.5s cubic-bezier(.2, 1.3, .4, 1) both;
+}
+
+html:not([data-theme="modern"]) :focus-visible {
+    outline: 3px solid var(--retro-orange);
+    outline-offset: 3px;
+}
+
+@keyframes retroTitleIn {
+    from { opacity: 0; transform: translateY(-14px) rotate(-3deg) scale(0.9); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes retroStripes {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+@keyframes retroBarberPole {
+    from { background-position: 0 0; }
+    to { background-position: 22.6px 0; }
+}
+
+@keyframes retroCardIn {
+    from { opacity: 0; transform: translateY(18px) rotate(-1deg); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes retroWiggle {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-12deg) scale(1.15); }
+    75% { transform: rotate(10deg) scale(1.1); }
+}
+
+@keyframes retroGlow {
+    0%, 100% { box-shadow: 4px 4px 0 var(--retro-ink); }
+    50% { box-shadow: 4px 4px 0 var(--retro-ink), 0 0 0 6px rgba(47, 111, 106, 0.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+html:not([data-theme="modern"]) header h1 { font-size: 2.2rem; padding: 0 2.5rem; }
+
+html:not([data-theme="modern"]) .coffee-type button {
+    min-width: 72px;
+    padding: 0.55rem 0.25rem;
+}
+
+html:not([data-theme="modern"]) .coffee-type .type-name {
+    font-size: 0.72rem;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+    html:not([data-theme="modern"]) header h1 { font-size: 1.9rem; }
+}
+
+/* Przycisk motywu nad nagłówkiem (h1 z animacją tworzy własny kontekst warstw) */
+.theme-toggle-btn { z-index: 5; }
