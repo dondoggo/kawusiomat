@@ -732,7 +732,8 @@
         secondsLeft: 0,
         totalSeconds: 0,
         bloomSeconds: 30,
-        brewSeconds: 0
+        brewSeconds: 0,
+        phaseEndsAt: 0
     };
 
     const timerEls = {
@@ -847,6 +848,7 @@
                 timer.phase = 'brew';
                 timer.secondsLeft = timer.brewSeconds;
                 timer.totalSeconds = timer.brewSeconds;
+                timer.phaseEndsAt = Date.now() + timer.brewSeconds * 1000;
                 updateTimerPhaseIndicators();
                 timerEls.ringWrap.classList.add('pulsing');
                 setTimeout(() => {
@@ -868,7 +870,8 @@
             updateTimerDisplay();
             return;
         }
-        timer.secondsLeft--;
+        // Liczymy od zapisanej godziny końca fazy, bo setInterval zwalnia przy zablokowanym ekranie
+        timer.secondsLeft = Math.max(0, Math.ceil((timer.phaseEndsAt - Date.now()) / 1000));
         updateTimerDisplay();
     };
 
@@ -876,7 +879,8 @@
         if (timer.phase === 'done') return;
         timer.running = true;
         timerEls.startBtn.textContent = 'Pauza';
-        timer.intervalId = setInterval(tickTimer, 1000);
+        timer.phaseEndsAt = Date.now() + timer.secondsLeft * 1000;
+        timer.intervalId = setInterval(tickTimer, 250);
     };
 
     timerEls.startBtn.addEventListener('click', () => {
@@ -1180,8 +1184,11 @@
     const THEME_KEY = 'kawusiomat_theme';
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
     const updateThemeBtn = () => {
         const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
+        themeColorMeta.setAttribute('content', isModern ? '#f2f2f2' : '#6f4e37');
         themeToggleBtn.title = isModern
             ? 'Motyw: Nowoczesny — kliknij, aby przełączyć na Klasyczny'
             : 'Motyw: Klasyczny — kliknij, aby przełączyć na Nowoczesny';

@@ -1,13 +1,14 @@
 'use strict';
 
-const CACHE_NAME = 'kawusiomat-v2';
+const CACHE_NAME = 'kawusiomat-v3';
 const ASSETS = [
     './',
     './index.html',
     './app.js',
     './style.css',
     './manifest.json',
-    './icon.svg'
+    './icon.svg',
+    './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (e) => {
