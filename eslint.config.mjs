@@ -17,6 +17,7 @@ export default [
                 setInterval: 'readonly',
                 AudioContext: 'readonly',
                 requestAnimationFrame: 'readonly',
+                performance: 'readonly',
                 console: 'readonly',
                 Promise: 'readonly'
             }

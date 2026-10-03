@@ -4,8 +4,8 @@
     "description": "Kreator przepisów do kawy z French Pressa",
     "start_url": "./",
     "display": "standalone",
-    "background_color": "#f5f0eb",
-    "theme_color": "#6f4e37",
+    "background_color": "#f7f1e8",
+    "theme_color": "#f7f1e8",
     "orientation": "portrait-primary",
     "icons": [
         {

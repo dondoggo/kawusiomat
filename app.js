@@ -66,119 +66,53 @@
         strength: 'medium'
     };
 
+    const MAX_CUPS = 6;
+
+    const STRENGTH_INFO = {
+        weak: 'Łagodna i lekka, dobra na popołudnie',
+        medium: 'Klasyczna, zbalansowana na co dzień',
+        strong: 'Intensywna i pełna, dla miłośników mocy'
+    };
+
+    const COLORS = {
+        coffee: '#4a2c1e',
+        americano: '#7b4b30',
+        milk: '#eedfc8',
+        foam: '#fffaf1',
+        weak: '#8c5d3f',
+        medium: '#5a3524',
+        strong: '#2c1a11'
+    };
+
     // ========================
     // DOM REFS
     // ========================
 
-    const stepSections = {};
-    for (let i = 1; i <= 4; i++) {
-        stepSections[i] = document.getElementById(`step-${i}`);
-    }
-    const recipeSection = document.getElementById('recipe-section');
-    const progressFill = document.getElementById('progress-fill');
-    const progressDots = document.querySelectorAll('.progress-dot');
-    const wizardProgress = document.getElementById('wizard-progress');
-    const favoritesPanel = document.getElementById('favorites-panel');
-    const favoritesList = document.getElementById('favorites-list');
-    const favoritesCount = document.getElementById('favorites-count');
-    const favoritesChevron = document.getElementById('favorites-chevron');
-    const toastEl = document.getElementById('toast');
-
-    // ========================
-    // PROGRESS BAR
-    // ========================
-
-    const updateProgress = (step, total) => {
-        const pct = (step / total) * 100;
-        progressFill.style.width = `${pct}%`;
-
-        progressDots.forEach((dot, d) => {
-            const dotStep = d + 1;
-            if (dotStep < step) {
-                dot.className = 'progress-dot done';
-            } else if (dotStep === step) {
-                dot.className = 'progress-dot current bounce';
-            } else {
-                dot.className = 'progress-dot';
-            }
-        });
+    const $ = (id) => document.getElementById(id);
+    const screens = {
+        1: $('screen-1'),
+        2: $('screen-2'),
+        3: $('screen-3'),
+        4: $('screen-4'),
+        recipe: $('screen-recipe')
     };
+    const dots = document.querySelectorAll('#dots .dot');
+    const dotsNav = $('dots');
+    const navBack = $('nav-back');
+    const primaryBtn = $('primary-btn');
+    const secondaryBtn = $('secondary-btn');
+    const favoritesPanel = $('favorites-panel');
+    const favoritesList = $('favorites-list');
+    const favoritesCount = $('favorites-count');
+    const toastEl = $('toast');
 
-    // ========================
-    // NAVIGATION
-    // ========================
-
-    const animateCard = (el) => {
-        el.classList.remove('card-enter');
-        void el.offsetWidth;
-        el.classList.add('card-enter');
-    };
-
-    const showStep = (stepNum) => {
-        for (let s = 1; s <= 4; s++) {
-            stepSections[s].classList.toggle('hidden', s !== stepNum);
-        }
-        recipeSection.classList.add('hidden');
-        wizardProgress.classList.remove('hidden');
-        if (stepNum === 1) {
-            renderFavoritesList();
-        } else {
-            favoritesPanel.classList.add('hidden');
-        }
-        updateProgress(stepNum, 4);
-        animateCard(stepSections[stepNum]);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const showRecipe = () => {
-        for (let s = 1; s <= 4; s++) {
-            stepSections[s].classList.add('hidden');
-        }
-        recipeSection.classList.remove('hidden');
-        wizardProgress.classList.add('hidden');
-        favoritesPanel.classList.add('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        requestAnimationFrame(() => {
-            animateCard(recipeSection);
-            animateRecipeChildren();
-        });
-    };
-
-    const resetAnimationClasses = () => {
-        const summary = document.getElementById('recipe-summary');
-        summary.classList.remove('summary-pop');
-
-        recipeSection.querySelectorAll('.stagger-item').forEach((el) => {
-            el.classList.remove('stagger-item');
-            el.style.removeProperty('animation-delay');
-        });
-    };
-
-    const animateRecipeChildren = () => {
-        resetAnimationClasses();
-        void recipeSection.offsetWidth;
-
-        const summary = document.getElementById('recipe-summary');
-        summary.classList.add('summary-pop');
-        summary.querySelectorAll('.summary-item').forEach((item, i) => {
-            item.style.animationDelay = `${i * 0.08}s`;
-        });
-
-        const staggerEls = recipeSection.querySelectorAll(
-            '.timer-section, .steps-list li, .info-bar, .cup-breakdown'
-        );
-        staggerEls.forEach((el, i) => {
-            el.classList.add('stagger-item');
-            el.style.animationDelay = `${0.15 + i * 0.05}s`;
-        });
-    };
+    let currentScreen = 1;
 
     // ========================
     // HELPERS
     // ========================
 
-    const escapeHtml = (s) => s
+    const escapeHtml = (s) => String(s)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -192,175 +126,277 @@
 
     const syncCups = () => {
         while (state.cups.length < state.cupCount) {
-            state.cups.push({ size: 250, type: 'czarna' });
+            state.cups.push({ ...state.cups[state.cups.length - 1] || { size: 250, type: 'czarna' } });
         }
         state.cups.length = state.cupCount;
     };
 
-    const popButton = (btn) => {
-        btn.classList.remove('pop');
-        void btn.offsetWidth;
-        btn.classList.add('pop');
+    const restartAnim = (el, cls) => {
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
     };
 
-    const setupStaticGroup = (groupEl, stateKey, parser) => {
-        groupEl.addEventListener('click', (e) => {
-            const btn = e.target.closest('button');
-            if (!btn || !groupEl.contains(btn)) return;
-            groupEl.querySelectorAll('button').forEach((b) => {
-                b.classList.remove('active');
+    // Rysunek filiżanki z warstwami (od dołu): [{ fraction, color }]
+    let svgUid = 0;
+    const cupSvg = (layers, { steam = false } = {}) => {
+        const id = `cup${++svgUid}`;
+        const top = 22;
+        const bottom = 56;
+        const fillMax = 0.9;
+        let y = bottom;
+        let rects = '';
+        for (const layer of layers) {
+            const h = (bottom - top) * fillMax * layer.fraction;
+            y -= h;
+            rects += `<rect x="0" y="${y.toFixed(2)}" width="64" height="${(h + 0.4).toFixed(2)}" fill="${layer.color}"/>`;
+        }
+        const steamPaths = steam
+            ? '<g class="steam"><path d="M26 16c-3-4 3-6 0-10"/><path d="M33 16c-3-4 3-6 0-10"/><path d="M40 16c-3-4 3-6 0-10"/></g>'
+            : '';
+        return `<svg class="cup-svg" viewBox="0 0 72 64" aria-hidden="true">` +
+            `<defs><clipPath id="${id}"><path d="M14 22h40l-3.5 28a7 7 0 0 1-7 6h-19a7 7 0 0 1-7-6z"/></clipPath></defs>` +
+            `${steamPaths}<g clip-path="url(#${id})">${rects}</g>` +
+            `<path class="cup-outline" d="M14 22h40l-3.5 28a7 7 0 0 1-7 6h-19a7 7 0 0 1-7-6z"/>` +
+            `<path class="cup-outline" d="M53.4 28h3.6a6 6 0 0 1 0 12h-4.9"/>` +
+            `<path class="cup-saucer" d="M8 60h52"/>` +
+            `</svg>`;
+    };
+
+    const typeLayers = (key) => {
+        const ct = COFFEE_TYPES[key];
+        if (key === 'americano') return [{ fraction: 1, color: COLORS.americano }];
+        const layers = [{ fraction: ct.baseFraction, color: COLORS.coffee }];
+        if (ct.milk) layers.push({ fraction: ct.milk, color: COLORS.milk });
+        if (ct.foam) layers.push({ fraction: ct.foam, color: COLORS.foam });
+        return layers;
+    };
+
+    // ========================
+    // NAVIGATION
+    // ========================
+
+    const SCREEN_ORDER = [1, 2, 3, 4, 'recipe'];
+
+    const showScreen = (target) => {
+        const from = SCREEN_ORDER.indexOf(currentScreen);
+        const to = SCREEN_ORDER.indexOf(target);
+        const dir = to >= from ? 'fwd' : 'back';
+        currentScreen = target;
+
+        for (const key of SCREEN_ORDER) {
+            screens[key].classList.toggle('hidden', key !== target);
+        }
+        const el = screens[target];
+        el.classList.remove('enter-fwd', 'enter-back');
+        void el.offsetWidth;
+        el.classList.add(`enter-${dir}`);
+
+        const isRecipe = target === 'recipe';
+        navBack.classList.toggle('invisible', target === 1);
+        dotsNav.classList.toggle('hidden', isRecipe);
+        dots.forEach((d, i) => {
+            d.classList.toggle('active', i + 1 === target);
+            d.classList.toggle('done', !isRecipe && i + 1 < target);
+        });
+
+        secondaryBtn.classList.toggle('hidden', !isRecipe);
+        primaryBtn.disabled = false;
+        if (isRecipe) {
+            primaryBtn.textContent = 'Zapisz przepis';
+        } else if (target === 4) {
+            primaryBtn.textContent = 'Pokaż przepis';
+        } else {
+            primaryBtn.textContent = 'Dalej';
+        }
+
+        if (target === 1) renderFavoritesList();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const goNext = () => {
+        if (currentScreen === 1) {
+            syncCups();
+            renderSizes();
+            showScreen(2);
+        } else if (currentScreen === 2) {
+            renderTypes();
+            showScreen(3);
+        } else if (currentScreen === 3) {
+            renderStrength();
+            showScreen(4);
+        } else if (currentScreen === 4) {
+            openRecipe();
+        } else {
+            saveCurrentRecipe();
+        }
+    };
+
+    const goBack = () => {
+        if (currentScreen === 'recipe') {
+            stopTimer();
+            showScreen(4);
+        } else if (currentScreen > 1) {
+            showScreen(currentScreen - 1);
+        }
+    };
+
+    primaryBtn.addEventListener('click', goNext);
+    navBack.addEventListener('click', goBack);
+    secondaryBtn.addEventListener('click', () => {
+        stopTimer();
+        showScreen(1);
+    });
+
+    // ========================
+    // STEP 1: liczba filiżanek
+    // ========================
+
+    const countValue = $('count-value');
+    const countLabel = $('count-label');
+    const countIllus = $('count-illus');
+    const countMinus = $('count-minus');
+    const countPlus = $('count-plus');
+
+    const renderCount = (animate) => {
+        countValue.textContent = String(state.cupCount);
+        countLabel.textContent = pluralizeCups(state.cupCount);
+        countMinus.disabled = state.cupCount <= 1;
+        countPlus.disabled = state.cupCount >= MAX_CUPS;
+
+        const existing = countIllus.children.length;
+        if (!animate || existing === 0) {
+            countIllus.innerHTML = '';
+            for (let i = 0; i < state.cupCount; i++) {
+                countIllus.insertAdjacentHTML('beforeend',
+                    `<span class="illus-cup">${cupSvg([{ fraction: 0.85, color: COLORS.coffee }], { steam: true })}</span>`);
+            }
+        } else if (state.cupCount > existing) {
+            countIllus.insertAdjacentHTML('beforeend',
+                `<span class="illus-cup pop-in">${cupSvg([{ fraction: 0.85, color: COLORS.coffee }], { steam: true })}</span>`);
+        } else if (state.cupCount < existing) {
+            countIllus.lastElementChild.remove();
+        }
+        countIllus.dataset.count = String(state.cupCount);
+        restartAnim(countValue, 'bump');
+    };
+
+    countMinus.addEventListener('click', () => {
+        if (state.cupCount > 1) {
+            state.cupCount--;
+            renderCount(true);
+        }
+    });
+
+    countPlus.addEventListener('click', () => {
+        if (state.cupCount < MAX_CUPS) {
+            state.cupCount++;
+            renderCount(true);
+        }
+    });
+
+    const setGreeting = () => {
+        const h = new Date().getHours();
+        let text = 'Dobry wieczór';
+        if (h >= 5 && h < 12) text = 'Dzień dobry';
+        else if (h >= 12 && h < 18) text = 'Miłego popołudnia';
+        $('greeting').textContent = text;
+    };
+
+    // ========================
+    // STEP 2: pojemność
+    // ========================
+
+    const cupHeader = (c, extra) =>
+        `<div class="cup-card-head"><span class="cup-index">${c + 1}</span>` +
+        `<span class="cup-card-title">Filiżanka ${c + 1}</span>` +
+        `${extra ? `<span class="cup-card-meta">${extra}</span>` : ''}</div>`;
+
+    const bindChoice = (container, onPick) => {
+        container.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-value]');
+            if (!btn || !container.contains(btn)) return;
+            const group = btn.closest('.choice-row');
+            group.querySelectorAll('button').forEach((b) => {
+                b.classList.toggle('active', b === btn);
+                b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
             });
-            btn.classList.add('active');
-            popButton(btn);
-            state[stateKey] = parser ? parser(btn.dataset.value) : btn.dataset.value;
+            restartAnim(btn, 'pressed');
+            onPick(Number(group.dataset.cup), btn.dataset.value, btn);
         });
     };
 
-    // ========================
-    // STEP 1 — Cup count
-    // ========================
+    const sizesContainer = $('sizes-container');
 
-    setupStaticGroup(
-        document.getElementById('cup-count-group'),
-        'cupCount',
-        (v) => parseInt(v, 10)
-    );
-
-    document.getElementById('next-1').addEventListener('click', () => {
-        syncCups();
-        renderCupSizes();
-        showStep(2);
-    });
-
-    // ========================
-    // STEP 2 — Cup sizes
-    // ========================
-
-    const renderCupSizes = () => {
-        const container = document.getElementById('cup-sizes-container');
-        container.innerHTML = '';
-
+    const renderSizes = () => {
+        let html = '';
         for (let c = 0; c < state.cupCount; c++) {
-            const card = document.createElement('div');
-            card.className = 'cup-config';
-
-            const title = document.createElement('h3');
-            title.textContent = `Filiżanka ${c + 1}`;
-            card.appendChild(title);
-
-            const group = document.createElement('div');
-            group.className = 'button-group';
-
+            html += `<div class="cup-card" style="--i:${c}">${cupHeader(c)}<div class="choice-row sizes" data-cup="${c}">`;
             for (const size of CUP_SIZES) {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.dataset.value = size;
-                btn.textContent = `${size} ml`;
-                if (state.cups[c].size === size) {
-                    btn.classList.add('active');
-                }
-                group.appendChild(btn);
+                const active = state.cups[c].size === size;
+                const scale = (0.62 + (size - 150) / 200 * 0.38).toFixed(2);
+                html += `<button type="button" class="choice size-choice${active ? ' active' : ''}" data-value="${size}" aria-pressed="${active}">` +
+                    `<span class="size-cup" style="--s:${scale}">${cupSvg([{ fraction: 0.8, color: COLORS.coffee }])}</span>` +
+                    `<span class="choice-label">${size}<small>ml</small></span></button>`;
             }
-
-            group.addEventListener('click', (e) => {
-                const b = e.target.closest('button');
-                if (!b) return;
-                group.querySelectorAll('button').forEach((x) => {
-                    x.classList.remove('active');
-                });
-                b.classList.add('active');
-                popButton(b);
-                state.cups[c].size = parseInt(b.dataset.value, 10);
-            });
-
-            card.appendChild(group);
-            card.classList.add('cup-config-enter');
-            card.style.animationDelay = `${c * 0.08}s`;
-            container.appendChild(card);
+            html += '</div></div>';
         }
+        sizesContainer.innerHTML = html;
     };
 
-    document.getElementById('back-2').addEventListener('click', () => {
-        showStep(1);
-    });
-    document.getElementById('next-2').addEventListener('click', () => {
-        renderCupTypes();
-        showStep(3);
+    bindChoice(sizesContainer, (c, value) => {
+        state.cups[c].size = parseInt(value, 10);
     });
 
     // ========================
-    // STEP 3 — Coffee types
+    // STEP 3: rodzaj kawy
     // ========================
 
-    const renderCupTypes = () => {
-        const container = document.getElementById('cup-types-container');
-        container.innerHTML = '';
+    const typesContainer = $('types-container');
 
-        const typeKeys = Object.keys(COFFEE_TYPES);
-
+    const renderTypes = () => {
+        let html = '';
         for (let c = 0; c < state.cupCount; c++) {
-            const card = document.createElement('div');
-            card.className = 'cup-config';
-
-            const title = document.createElement('h3');
-            title.textContent = `Filiżanka ${c + 1} (${state.cups[c].size} ml)`;
-            card.appendChild(title);
-
-            const group = document.createElement('div');
-            group.className = 'button-group coffee-type';
-
-            for (const key of typeKeys) {
-                const ct = COFFEE_TYPES[key];
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.dataset.value = key;
-                btn.innerHTML =
-                    `<span class="type-icon">${ct.icon}</span>` +
-                    `<span class="type-name">${ct.label}</span>`;
-                if (state.cups[c].type === key) {
-                    btn.classList.add('active');
-                }
-                group.appendChild(btn);
+            html += `<div class="cup-card" style="--i:${c}">${cupHeader(c, `${state.cups[c].size} ml`)}<div class="choice-row types" data-cup="${c}">`;
+            for (const key of Object.keys(COFFEE_TYPES)) {
+                const active = state.cups[c].type === key;
+                html += `<button type="button" class="choice type-choice${active ? ' active' : ''}" data-value="${key}" aria-pressed="${active}">` +
+                    `<span class="type-cup">${cupSvg(typeLayers(key))}</span>` +
+                    `<span class="choice-label">${COFFEE_TYPES[key].label}</span></button>`;
             }
-
-            group.addEventListener('click', (e) => {
-                const b = e.target.closest('button');
-                if (!b) return;
-                group.querySelectorAll('button').forEach((x) => {
-                    x.classList.remove('active');
-                });
-                b.classList.add('active');
-                popButton(b);
-                state.cups[c].type = b.dataset.value;
-            });
-
-            card.appendChild(group);
-            card.classList.add('cup-config-enter');
-            card.style.animationDelay = `${c * 0.08}s`;
-            container.appendChild(card);
+            html += '</div></div>';
         }
+        typesContainer.innerHTML = html;
     };
 
-    document.getElementById('back-3').addEventListener('click', () => {
-        showStep(2);
-    });
-    document.getElementById('next-3').addEventListener('click', () => {
-        showStep(4);
+    bindChoice(typesContainer, (c, value) => {
+        state.cups[c].type = value;
     });
 
     // ========================
-    // STEP 4 — Strength
+    // STEP 4: moc
     // ========================
 
-    setupStaticGroup(document.getElementById('strength-group'), 'strength');
+    const strengthGroup = $('strength-group');
 
-    document.getElementById('back-4').addEventListener('click', () => {
-        showStep(3);
-    });
-    document.getElementById('brew-btn').addEventListener('click', () => {
-        const recipe = calculateRecipe();
-        renderRecipe(recipe);
-        showRecipe();
+    const renderStrength = () => {
+        let html = '<div class="choice-row strengths" data-cup="0">';
+        Object.keys(STRENGTHS).forEach((key, i) => {
+            const s = STRENGTHS[key];
+            const active = state.strength === key;
+            html += `<button type="button" class="choice strength-choice${active ? ' active' : ''}" data-value="${key}" aria-pressed="${active}" style="--i:${i}">` +
+                `<span class="strength-cup">${cupSvg([{ fraction: 0.85, color: COLORS[key] }])}</span>` +
+                `<span class="strength-text"><span class="strength-name">${s.label}</span>` +
+                `<span class="strength-desc">${STRENGTH_INFO[key]}</span>` +
+                `<span class="strength-meta">1:${s.ratio} · ${s.brewTime} min</span></span>` +
+                `<span class="radio" aria-hidden="true"></span></button>`;
+        });
+        html += '</div>';
+        strengthGroup.innerHTML = html;
+    };
+
+    bindChoice(strengthGroup, (_c, value) => {
+        state.strength = value;
     });
 
     // ========================
@@ -420,126 +456,6 @@
             strengthLabel: strength.label
         };
     };
-
-    // ========================
-    // RENDER RECIPE
-    // ========================
-
-    const renderRecipe = (recipe) => {
-        renderBrewAnimation();
-        renderSummary(recipe);
-        renderBreakdown(recipe);
-        initTimer(recipe);
-        renderSteps(generateSteps(recipe));
-        renderTips(recipe);
-    };
-
-    const renderBrewAnimation = () => {
-        let anim = document.getElementById('brew-anim');
-        if (anim) anim.remove();
-        anim = document.createElement('div');
-        anim.className = 'brew-animation';
-        anim.id = 'brew-anim';
-        anim.innerHTML =
-            `<div class="brew-cup">` +
-                `<div class="brew-pour"></div>` +
-                `<div class="brew-liquid"></div>` +
-                `<div class="brew-steam"></div>` +
-                `<div class="brew-steam"></div>` +
-                `<div class="brew-steam"></div>` +
-                `<div class="brew-cup-handle"></div>` +
-            `</div>`;
-        const summary = document.getElementById('recipe-summary');
-        summary.parentNode.insertBefore(anim, summary);
-    };
-
-    const renderSummary = (recipe) => {
-        const el = document.getElementById('recipe-summary');
-        let html =
-            `<div class="summary-item">` +
-                `<span class="summary-value">${recipe.coffeeGrams} g</span>` +
-                `<span class="summary-label">Kawa mielona</span>` +
-            `</div>` +
-            `<div class="summary-item">` +
-                `<span class="summary-value">${recipe.totalBaseWater} ml</span>` +
-                `<span class="summary-label">Woda do zaparzenia</span>` +
-            `</div>` +
-            `<div class="summary-item">` +
-                `<span class="summary-value">${recipe.temperature}°C</span>` +
-                `<span class="summary-label">Temperatura</span>` +
-            `</div>` +
-            `<div class="summary-item">` +
-                `<span class="summary-value">${recipe.brewTime} min</span>` +
-                `<span class="summary-label">Czas parzenia</span>` +
-            `</div>`;
-
-        if (recipe.totalMilk + recipe.totalFoam > 0) {
-            html +=
-                `<div class="summary-item">` +
-                    `<span class="summary-value">${recipe.totalMilk + recipe.totalFoam} ml</span>` +
-                    `<span class="summary-label">Mleko łącznie</span>` +
-                `</div>`;
-        }
-
-        if (recipe.totalExtraWater > 0) {
-            html +=
-                `<div class="summary-item">` +
-                    `<span class="summary-value">${recipe.totalExtraWater} ml</span>` +
-                    `<span class="summary-label">Dodatkowa woda</span>` +
-                `</div>`;
-        }
-
-        el.innerHTML = html;
-    };
-
-    const renderBreakdown = (recipe) => {
-        const section = document.getElementById('recipe-breakdown');
-        const content = section.querySelector('.breakdown-content');
-
-        let needsBreakdown = state.cupCount > 1;
-        if (!needsBreakdown) {
-            needsBreakdown = recipe.cups.some((cup) => cup.type !== 'czarna');
-        }
-
-        if (!needsBreakdown) {
-            section.classList.add('hidden');
-            return;
-        }
-
-        section.classList.remove('hidden');
-
-        let html = '';
-        for (const cup of recipe.cups) {
-            html +=
-                `<div class="cup-breakdown">` +
-                    `<div class="cup-breakdown-header">` +
-                        `<span class="cup-num">${cup.typeIcon}</span>` +
-                        `<span>Filiżanka ${cup.index} — ${cup.typeLabel} (${cup.size} ml)</span>` +
-                    `</div>` +
-                    `<div class="cup-breakdown-details">` +
-                        `<span class="detail-chip base">${cup.baseMl} ml bazy</span>`;
-
-            if (cup.milkMl > 0) {
-                html += `<span class="detail-chip milk">${cup.milkMl} ml mleka</span>`;
-            }
-            if (cup.foamMl > 0) {
-                html += `<span class="detail-chip foam">${cup.foamMl} ml pianki</span>`;
-            }
-            if (cup.waterMl > 0) {
-                html += `<span class="detail-chip water">${cup.waterMl} ml wody</span>`;
-            }
-
-            html +=
-                    `</div>` +
-                `</div>`;
-        }
-
-        content.innerHTML = html;
-    };
-
-    // ========================
-    // STEPS
-    // ========================
 
     const generateSteps = (recipe) => {
         const steps = [];
@@ -633,47 +549,110 @@
         return steps;
     };
 
-    const stepsProgressEl = document.getElementById('steps-progress');
+    // ========================
+    // RECIPE VIEW
+    // ========================
+
+    const tabs = document.querySelectorAll('.tab');
+    const tabIndicator = $('tab-indicator');
+
+    const selectTab = (name) => {
+        tabs.forEach((t) => {
+            const on = t.dataset.tab === name;
+            t.classList.toggle('active', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+            if (on) {
+                tabIndicator.style.width = `${t.offsetWidth}px`;
+                tabIndicator.style.transform = `translateX(${t.offsetLeft}px)`;
+            }
+        });
+        document.querySelectorAll('.tab-panel').forEach((p) => {
+            const on = p.dataset.panel === name;
+            p.classList.toggle('hidden', !on);
+            if (on) restartAnim(p, 'panel-in');
+        });
+    };
+
+    tabs.forEach((t) => t.addEventListener('click', () => selectTab(t.dataset.tab)));
+    window.addEventListener('resize', () => {
+        const active = document.querySelector('.tab.active');
+        if (active && currentScreen === 'recipe') selectTab(active.dataset.tab);
+    });
+
+    const countUp = (el, target) => {
+        const start = performance.now();
+        const dur = 700;
+        const step = (now) => {
+            const t = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - t, 3);
+            el.textContent = String(Math.round(target * eased));
+            if (t < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    };
+
+    const renderHero = (recipe) => {
+        const first = state.cups[0].type;
+        $('hero-illus').innerHTML = cupSvg(typeLayers(first), { steam: true });
+        countUp($('stat-coffee'), recipe.coffeeGrams);
+        countUp($('stat-water'), recipe.totalBaseWater);
+
+        const chips = [
+            `<span class="chip">🌡 ${recipe.temperature}°C</span>`,
+            `<span class="chip">⏱ ${recipe.brewTime} min</span>`,
+            `<span class="chip">${recipe.strengthLabel}</span>`
+        ];
+        if (recipe.totalMilk + recipe.totalFoam > 0) {
+            chips.push(`<span class="chip">🥛 ${recipe.totalMilk + recipe.totalFoam} ml mleka</span>`);
+        }
+        if (recipe.totalExtraWater > 0) {
+            chips.push(`<span class="chip">💧 +${recipe.totalExtraWater} ml wody</span>`);
+        }
+        $('recipe-chips').innerHTML = chips.join('');
+    };
+
+    const renderBreakdown = (recipe) => {
+        const el = $('recipe-breakdown');
+        const needs = recipe.cups.length > 1 || recipe.cups.some((c) => c.type !== 'czarna');
+        el.classList.toggle('hidden', !needs);
+        if (!needs) return;
+
+        el.innerHTML = recipe.cups.map((cup) => {
+            const parts = [`${cup.baseMl} ml kawy`];
+            if (cup.waterMl) parts.push(`${cup.waterMl} ml wody`);
+            if (cup.milkMl) parts.push(`${cup.milkMl} ml mleka`);
+            if (cup.foamMl) parts.push(`${cup.foamMl} ml pianki`);
+            return `<div class="breakdown-item">` +
+                `<span class="breakdown-cup">${cupSvg(typeLayers(cup.type))}</span>` +
+                `<span class="breakdown-text"><span><strong>${cup.typeLabel}</strong> · ${cup.size} ml</span>` +
+                `<small>${parts.join(' · ')}</small></span></div>`;
+        }).join('');
+    };
+
+    const stepsProgressEl = $('steps-progress');
 
     const updateStepsProgress = () => {
         const all = document.querySelectorAll('#steps-list li');
         const done = document.querySelectorAll('#steps-list li.done');
-        stepsProgressEl.textContent = `${done.length} / ${all.length}`;
+        stepsProgressEl.textContent = `${done.length}/${all.length}`;
         stepsProgressEl.classList.toggle('complete', all.length > 0 && done.length === all.length);
     };
 
     const renderSteps = (stepsArr) => {
-        const el = document.getElementById('steps-list');
-        el.innerHTML = '';
-
-        for (const text of stepsArr) {
-            const li = document.createElement('li');
-            li.innerHTML =
-                `<span class="step-checkbox"></span>` +
-                `<span class="step-text">${text}</span>`;
-
-            li.addEventListener('click', function () {
-                this.classList.toggle('done');
-                if (this.classList.contains('done')) {
-                    this.classList.add('check-anim');
-                    setTimeout(() => {
-                        this.classList.remove('check-anim');
-                    }, 350);
-                }
+        const el = $('steps-list');
+        el.innerHTML = stepsArr.map((text, i) =>
+            `<li style="--i:${i}"><span class="step-check" aria-hidden="true"></span>` +
+            `<span class="step-text">${text}</span></li>`).join('');
+        el.querySelectorAll('li').forEach((li) => {
+            li.addEventListener('click', () => {
+                li.classList.toggle('done');
                 updateStepsProgress();
             });
-
-            el.appendChild(li);
-        }
+        });
         updateStepsProgress();
     };
 
-    // ========================
-    // INFO TIPS
-    // ========================
-
     const renderTips = (recipe) => {
-        const el = document.getElementById('recipe-tips');
         const needsMilk = (recipe.totalMilk + recipe.totalFoam) > 0;
 
         const tips = [
@@ -716,19 +695,21 @@
                   'i napój będzie mętny i przeparzony.'
         });
 
-        let html = '<h3>Dobre praktyki</h3>';
-        for (const t of tips) {
-            html +=
-                `<details class="info-bar ${t.cls}">` +
-                    `<summary class="info-bar-summary">` +
-                        `<span class="info-bar-icon">${t.icon}</span>` +
-                        `<span class="info-bar-title">${t.title}</span>` +
-                    `</summary>` +
-                    `<div class="info-bar-body">${t.text}</div>` +
-                `</details>`;
-        }
+        $('recipe-tips').innerHTML = tips.map((t, i) =>
+            `<details class="tip"${i === 0 ? ' open' : ''}>` +
+            `<summary><span class="tip-icon">${t.icon}</span><span class="tip-title">${t.title}</span></summary>` +
+            `<p>${t.text}</p></details>`).join('');
+    };
 
-        el.innerHTML = html;
+    const openRecipe = () => {
+        const recipe = calculateRecipe();
+        renderHero(recipe);
+        renderBreakdown(recipe);
+        renderSteps(generateSteps(recipe));
+        renderTips(recipe);
+        initTimer(recipe);
+        showScreen('recipe');
+        requestAnimationFrame(() => selectTab('steps'));
     };
 
     // ========================
@@ -911,19 +892,6 @@
     });
 
     // ========================
-    // BACK TO START
-    // ========================
-
-    document.getElementById('back-btn').addEventListener('click', () => {
-        stopTimer();
-        const anim = document.getElementById('brew-anim');
-        if (anim) anim.remove();
-        resetAnimationClasses();
-        recipeSection.classList.remove('card-enter');
-        showStep(1);
-    });
-
-    // ========================
     // FAVORITES
     // ========================
 
@@ -1012,17 +980,8 @@
         state.cupCount = fav.cupCount;
         state.cups = fav.cups.map((c) => ({ ...c }));
         state.strength = fav.strength;
-
-        document.querySelectorAll('#cup-count-group button').forEach((b) => {
-            b.classList.toggle('active', parseInt(b.dataset.value, 10) === fav.cupCount);
-        });
-        document.querySelectorAll('#strength-group button').forEach((b) => {
-            b.classList.toggle('active', b.dataset.value === fav.strength);
-        });
-
-        const recipe = calculateRecipe();
-        renderRecipe(recipe);
-        showRecipe();
+        renderCount(false);
+        openRecipe();
     };
 
     const startEditFavName = (labelEl, id) => {
@@ -1070,60 +1029,42 @@
 
     const renderFavoritesList = () => {
         const favs = loadFavorites();
-        if (favs.length === 0) {
-            favoritesPanel.classList.add('hidden');
-            return;
-        }
+        favoritesPanel.classList.toggle('hidden', favs.length === 0);
+        if (favs.length === 0) return;
 
-        favoritesPanel.classList.remove('hidden');
         favoritesCount.textContent = String(favs.length);
+        favoritesList.innerHTML = favs.map((fav) =>
+            `<div class="fav-item">` +
+                `<span class="fav-cup">${cupSvg(typeLayers(fav.cups[0] ? fav.cups[0].type : 'czarna'))}</span>` +
+                `<div class="fav-info">` +
+                    `<div class="fav-label" data-id="${fav.id}" title="Kliknij, aby zmienić nazwę">${escapeHtml(fav.label)}</div>` +
+                    `<div class="fav-meta">${escapeHtml(fav.strengthLabel)} · ${formatFavDate(fav.date)}</div>` +
+                `</div>` +
+                `<button type="button" class="fav-load" data-id="${fav.id}">Parz</button>` +
+                `<button type="button" class="fav-del" data-id="${fav.id}" aria-label="Usuń">✕</button>` +
+            `</div>`).join('');
 
-        let html = '';
-        for (const fav of favs) {
-            html +=
-                `<div class="fav-item">` +
-                    `<div class="fav-info">` +
-                        `<div class="fav-label fav-label-editable" data-id="${fav.id}" title="Kliknij, aby zmienić nazwę">${escapeHtml(fav.label)}</div>` +
-                        `<div class="fav-meta">${fav.strengthLabel} · ${formatFavDate(fav.date)}</div>` +
-                    `</div>` +
-                    `<div class="fav-actions">` +
-                        `<button type="button" class="btn-fav-load" data-id="${fav.id}">Załaduj</button>` +
-                        `<button type="button" class="btn-fav-del" data-id="${fav.id}" aria-label="Usuń">×</button>` +
-                    `</div>` +
-                `</div>`;
-        }
-        favoritesList.innerHTML = html;
-
-        favoritesList.querySelectorAll('.btn-fav-load').forEach((btn) => {
+        favoritesList.querySelectorAll('.fav-load').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const fav = loadFavorites().find((f) => f.id === Number(btn.dataset.id));
                 if (fav) loadFavoriteToState(fav);
             });
         });
-
-        favoritesList.querySelectorAll('.btn-fav-del').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                deleteFavorite(Number(btn.dataset.id));
-            });
+        favoritesList.querySelectorAll('.fav-del').forEach((btn) => {
+            btn.addEventListener('click', () => deleteFavorite(Number(btn.dataset.id)));
         });
-
-        favoritesList.querySelectorAll('.fav-label-editable').forEach((el) => {
+        favoritesList.querySelectorAll('.fav-label').forEach((el) => {
             el.addEventListener('click', () => startEditFavName(el, Number(el.dataset.id)));
         });
     };
 
-    document.getElementById('favorites-toggle').addEventListener('click', () => {
-        const isOpen = favoritesPanel.classList.toggle('favorites-open');
-        favoritesChevron.textContent = isOpen ? '▲' : '▼';
-    });
-
-    const saveBtnEl = document.getElementById('save-btn');
-    saveBtnEl.addEventListener('click', () => {
+    const saveCurrentRecipe = () => {
         if (loadFavorites().some(isSameRecipe)) {
-            showToast('Ten przepis jest już zapisany ⭐');
+            showToast('Ten przepis jest już zapisany');
             return;
         }
-        const newFav = {
+        const favs = loadFavorites();
+        favs.unshift({
             id: Date.now(),
             label: generateFavoriteLabel(),
             strengthLabel: STRENGTHS[state.strength].label,
@@ -1131,20 +1072,19 @@
             cupCount: state.cupCount,
             cups: state.cups.map((c) => ({ ...c })),
             strength: state.strength
-        };
-        const favs = loadFavorites();
-        favs.unshift(newFav);
+        });
         if (favs.length > 20) favs.length = 20;
         saveFavorites(favs);
-        renderFavoritesList();
-        showToast('Przepis zapisany ⭐');
-        saveBtnEl.textContent = 'Zapisano ✓';
-        saveBtnEl.disabled = true;
+        showToast('Zapisano w ulubionych');
+        primaryBtn.textContent = 'Zapisano ✓';
+        primaryBtn.disabled = true;
         setTimeout(() => {
-            saveBtnEl.textContent = 'Zapisz ⭐';
-            saveBtnEl.disabled = false;
+            if (currentScreen === 'recipe') {
+                primaryBtn.textContent = 'Zapisz przepis';
+                primaryBtn.disabled = false;
+            }
         }, 2000);
-    });
+    };
 
     // ========================
     // PWA
@@ -1193,28 +1133,29 @@
     // ========================
 
     const THEME_KEY = 'kawusiomat_theme';
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-
+    const themeToggleBtn = $('theme-toggle-btn');
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
     const updateThemeBtn = () => {
         const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
-        themeColorMeta.setAttribute('content', isModern ? '#f2f2f2' : '#4a2c1d');
+        themeColorMeta.setAttribute('content', isModern ? '#f2f2f2' : '#f7f1e8');
         themeToggleBtn.title = isModern
-            ? 'Motyw: Nowoczesny — kliknij, aby przełączyć na Klasyczny'
-            : 'Motyw: Klasyczny — kliknij, aby przełączyć na Nowoczesny';
+            ? 'Motyw: Nowoczesny. Kliknij, aby przełączyć na Ciepły'
+            : 'Motyw: Ciepły. Kliknij, aby przełączyć na Nowoczesny';
     };
-
-    updateThemeBtn();
 
     themeToggleBtn.addEventListener('click', () => {
         const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
-        if (isModern) {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem(THEME_KEY, 'classic');
-        } else {
-            document.documentElement.setAttribute('data-theme', 'modern');
-            localStorage.setItem(THEME_KEY, 'modern');
+        try {
+            if (isModern) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem(THEME_KEY, 'classic');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'modern');
+                localStorage.setItem(THEME_KEY, 'modern');
+            }
+        } catch {
+            // brak dostępu do localStorage
         }
         updateThemeBtn();
     });
@@ -1223,8 +1164,10 @@
     // INIT
     // ========================
 
-    updateProgress(1, 4);
-    renderFavoritesList();
+    setGreeting();
+    updateThemeBtn();
+    renderCount(false);
+    showScreen(1);
 })();
 
 if ('serviceWorker' in navigator) {
