@@ -1,7 +1,7 @@
 export default [
     {
         files: ['**/*.js'],
-        ignores: ['node_modules/**', 'eslint.config.js'],
+        ignores: ['node_modules/**', 'sw.js'],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'script',
@@ -10,6 +10,7 @@ export default [
                 document: 'readonly',
                 navigator: 'readonly',
                 localStorage: 'readonly',
+                sessionStorage: 'readonly',
                 setTimeout: 'readonly',
                 clearTimeout: 'readonly',
                 clearInterval: 'readonly',
@@ -37,6 +38,26 @@ export default [
             'prefer-template': 'warn',
             'no-eval': 'error',
             'no-implied-eval': 'error'
+        }
+    },
+    {
+        files: ['sw.js'],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: 'script',
+            globals: {
+                self: 'readonly',
+                caches: 'readonly',
+                fetch: 'readonly',
+                URL: 'readonly',
+                Promise: 'readonly'
+            }
+        },
+        rules: {
+            'no-undef': 'error',
+            'no-var': 'error',
+            'prefer-const': 'warn',
+            'eqeqeq': ['warn', 'always']
         }
     }
 ];

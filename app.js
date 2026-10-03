@@ -614,7 +614,7 @@
             if (recipe.cups.length === 1) {
                 const cup = recipe.cups[0];
                 let milkLine = 'Dodaj do filiżanki';
-                if (cup.milkMl > 0) milkLine += ` ${cup.milkMl} ml spieninego mleka`;
+                if (cup.milkMl > 0) milkLine += ` ${cup.milkMl} ml spienionego mleka`;
                 if (cup.foamMl > 0) milkLine += `${cup.milkMl > 0 ? ' i ' : ' '}${cup.foamMl} ml pianki`;
                 steps.push(milkLine);
             } else {
@@ -678,7 +678,7 @@
                 cls: 'temp',
                 icon: '\uD83C\uDF21\uFE0F',
                 title: 'Temperatura',
-                text: 'Optymalna temperatura parzenia to 93–96°C. Wrzatek parzy kawę ' +
+                text: 'Optymalna temperatura parzenia to 93–96°C. Wrzątek parzy kawę ' +
                       'zbyt intensywnie (gorzki smak), a za zimna woda da słabą, ' +
                       'kwaśną ekstrakcję. Wystarczy odczekać ok. 1 min po zagotowaniu.'
             }
@@ -923,7 +923,11 @@
     };
 
     const saveFavorites = (favs) => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
+        } catch {
+            showToast('Nie udało się zapisać przepisów');
+        }
     };
 
     const generateFavoriteLabel = () => {
@@ -1156,7 +1160,9 @@
     });
 
     // iOS Safari — brak beforeinstallprompt, pokazujemy ręczną instrukcję
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    // iPadOS 13+ przedstawia się jako Macintosh, rozpoznajemy go po ekranie dotykowym
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+        (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
     const isStandalone = navigator.standalone === true;
     const iosBannerDismissed = sessionStorage.getItem('ios_banner_dismissed');
     if (isIos && !isStandalone && !iosBannerDismissed) {
