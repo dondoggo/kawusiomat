@@ -19,20 +19,25 @@
 </head>
 <body>
     <div class="container">
-        <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" title="Przełącz motyw">◑</button>
-        <header>
-            <h1>☕ Kawusiomat</h1>
-            <p class="subtitle">Stwórz idealną kawę krok po kroku</p>
-            <button type="button" id="pwa-install-btn" class="pwa-install-btn hidden">
-                📲 Zainstaluj aplikację
-            </button>
-            <div id="ios-install-banner" class="ios-install-banner hidden">
-                <span>Zainstaluj: tapnij</span>
-                <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                <span>→ <strong>Dodaj do ekranu głównego</strong></span>
-                <button type="button" class="ios-banner-close" id="ios-banner-close">✕</button>
+        <header class="topbar">
+            <div class="brand">
+                <span class="brand-badge" aria-hidden="true">☕</span>
+                <div class="brand-text">
+                    <h1>Kawusiomat</h1>
+                    <p class="subtitle">French Press · krok po kroku</p>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <button type="button" id="pwa-install-btn" class="pwa-install-btn hidden" title="Zainstaluj aplikację">📲 <span class="pwa-install-label">Zainstaluj</span></button>
+                <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" title="Przełącz motyw">◑</button>
             </div>
         </header>
+        <div id="ios-install-banner" class="ios-install-banner hidden">
+            <span>Zainstaluj: tapnij</span>
+            <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            <span>→ <strong>Dodaj do ekranu głównego</strong></span>
+            <button type="button" class="ios-banner-close" id="ios-banner-close">✕</button>
+        </div>
 
         <!-- Progress -->
         <div class="wizard-progress" id="wizard-progress">
@@ -72,14 +77,15 @@
 
             <!-- STEP 1: Cup count -->
             <section class="card" id="step-1">
+                <span class="step-eyebrow">Krok 1 z 4</span>
                 <h2>Ile filiżanek?</h2>
                 <div class="button-group" id="cup-count-group">
-                    <button type="button" data-value="1" class="active">1</button>
-                    <button type="button" data-value="2">2</button>
-                    <button type="button" data-value="3">3</button>
-                    <button type="button" data-value="4">4</button>
-                    <button type="button" data-value="5">5</button>
-                    <button type="button" data-value="6">6</button>
+                    <button type="button" data-value="1" class="active"><span class="count-num">1</span><span class="count-cups" aria-hidden="true">☕</span></button>
+                    <button type="button" data-value="2"><span class="count-num">2</span><span class="count-cups" aria-hidden="true">☕☕</span></button>
+                    <button type="button" data-value="3"><span class="count-num">3</span><span class="count-cups" aria-hidden="true">☕☕☕</span></button>
+                    <button type="button" data-value="4"><span class="count-num">4</span><span class="count-cups" aria-hidden="true">☕☕☕☕</span></button>
+                    <button type="button" data-value="5"><span class="count-num">5</span><span class="count-cups" aria-hidden="true">☕☕☕☕☕</span></button>
+                    <button type="button" data-value="6"><span class="count-num">6</span><span class="count-cups" aria-hidden="true">☕☕☕☕☕☕</span></button>
                 </div>
                 <div class="step-nav">
                     <div></div>
@@ -89,6 +95,7 @@
 
             <!-- STEP 2: Cup sizes -->
             <section class="card hidden" id="step-2">
+                <span class="step-eyebrow">Krok 2 z 4</span>
                 <h2>Pojemność filiżanek</h2>
                 <div id="cup-sizes-container"></div>
                 <div class="step-nav">
@@ -99,6 +106,7 @@
 
             <!-- STEP 3: Coffee types -->
             <section class="card hidden" id="step-3">
+                <span class="step-eyebrow">Krok 3 z 4</span>
                 <h2>Jaka kawa do której filiżanki?</h2>
                 <div id="cup-types-container"></div>
                 <div class="step-nav">
@@ -109,6 +117,7 @@
 
             <!-- STEP 4: Strength -->
             <section class="card hidden" id="step-4">
+                <span class="step-eyebrow">Krok 4 z 4</span>
                 <h2>Moc kawy</h2>
                 <div class="button-group coffee-type" id="strength-group">
                     <button type="button" data-value="weak">
@@ -135,13 +144,14 @@
 
             <!-- RECIPE -->
             <section class="card hidden" id="recipe-section">
-                <h2>Baza kawy (French Press)</h2>
+                <div class="recipe-head">
+                    <span class="step-eyebrow">Twój przepis</span>
+                    <h2>Baza kawy (French Press)</h2>
+                </div>
                 <div class="recipe-summary" id="recipe-summary"></div>
 
-                <div class="breakdown-section hidden" id="recipe-breakdown">
-                    <h3>Podział na filiżanki</h3>
-                    <div class="breakdown-content"></div>
-                </div>
+                <div class="recipe-grid">
+                <div class="recipe-col recipe-col-side">
 
                 <!-- Timer -->
                 <div class="timer-section" id="timer-section">
@@ -175,10 +185,22 @@
                     </div>
                 </div>
 
-                <h3>Kroki</h3>
+                <div class="breakdown-section hidden" id="recipe-breakdown">
+                    <h3>Podział na filiżanki</h3>
+                    <div class="breakdown-content"></div>
+                </div>
+                </div>
+
+                <div class="recipe-col recipe-col-main">
+                <div class="steps-head">
+                    <h3>Kroki</h3>
+                    <span class="steps-progress" id="steps-progress">0 / 0</span>
+                </div>
                 <ol class="steps-list" id="steps-list"></ol>
 
                 <div id="recipe-tips"></div>
+                </div>
+                </div>
 
                 <div class="recipe-actions">
                     <button type="button" class="btn-back" id="back-btn">← Od nowa</button>

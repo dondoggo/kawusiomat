@@ -633,6 +633,15 @@
         return steps;
     };
 
+    const stepsProgressEl = document.getElementById('steps-progress');
+
+    const updateStepsProgress = () => {
+        const all = document.querySelectorAll('#steps-list li');
+        const done = document.querySelectorAll('#steps-list li.done');
+        stepsProgressEl.textContent = `${done.length} / ${all.length}`;
+        stepsProgressEl.classList.toggle('complete', all.length > 0 && done.length === all.length);
+    };
+
     const renderSteps = (stepsArr) => {
         const el = document.getElementById('steps-list');
         el.innerHTML = '';
@@ -651,10 +660,12 @@
                         this.classList.remove('check-anim');
                     }, 350);
                 }
+                updateStepsProgress();
             });
 
             el.appendChild(li);
         }
+        updateStepsProgress();
     };
 
     // ========================
@@ -708,13 +719,13 @@
         let html = '<h3>Dobre praktyki</h3>';
         for (const t of tips) {
             html +=
-                `<div class="info-bar ${t.cls}">` +
-                    `<span class="info-bar-icon">${t.icon}</span>` +
-                    `<div class="info-bar-body">` +
+                `<details class="info-bar ${t.cls}">` +
+                    `<summary class="info-bar-summary">` +
+                        `<span class="info-bar-icon">${t.icon}</span>` +
                         `<span class="info-bar-title">${t.title}</span>` +
-                        `${t.text}` +
-                    `</div>` +
-                `</div>`;
+                    `</summary>` +
+                    `<div class="info-bar-body">${t.text}</div>` +
+                `</details>`;
         }
 
         el.innerHTML = html;

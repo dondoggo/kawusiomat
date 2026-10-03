@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'kawusiomat-v4';
+const CACHE_NAME = 'kawusiomat-v5';
 const ASSETS = [
     './',
     './index.html',
