@@ -35,27 +35,6 @@
     --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-[data-theme="modern"] {
-    --bg: #f2f2f2;
-    --surface: #ffffff;
-    --surface-2: #ebebeb;
-    --ink: #111111;
-    --muted: #7a7a7a;
-    --line: #dddddd;
-    --accent: #111111;
-    --accent-ink: #ffffff;
-    --accent-soft: #e6e6e6;
-    --success: #111111;
-    --cup-line: #111111;
-    --font-display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --radius-lg: 6px;
-    --radius: 4px;
-    --radius-sm: 4px;
-    --shadow: 0 0 0 1px #dddddd;
-    --shadow-lift: 0 0 0 1.5px #111111;
-}
-
 html {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
@@ -279,16 +258,6 @@ button:disabled {
     color: var(--accent);
 }
 
-[data-theme="modern"] .display {
-    font-weight: 700;
-    letter-spacing: -0.04em;
-}
-
-[data-theme="modern"] .display em {
-    font-style: normal;
-    color: var(--muted);
-}
-
 /* Filiżanka SVG */
 
 .cup-svg {
@@ -390,10 +359,6 @@ button:disabled {
     box-shadow: var(--shadow);
 }
 
-[data-theme="modern"] .stepper {
-    border-radius: var(--radius);
-}
-
 .stepper-btn {
     width: 56px;
     height: 56px;
@@ -402,10 +367,6 @@ button:disabled {
     font-size: 1.6rem;
     line-height: 1;
     transition: transform 0.2s var(--ease), background 0.2s ease, opacity 0.2s ease;
-}
-
-[data-theme="modern"] .stepper-btn {
-    border-radius: var(--radius);
 }
 
 .stepper-btn:hover:not(:disabled) {
@@ -854,10 +815,6 @@ button:disabled {
     border-radius: 999px;
 }
 
-[data-theme="modern"] .tabs {
-    border-radius: var(--radius);
-}
-
 .tab {
     position: relative;
     z-index: 1;
@@ -888,10 +845,6 @@ button:disabled {
     background: var(--surface);
     box-shadow: var(--shadow);
     transition: transform 0.45s var(--ease), width 0.45s var(--ease);
-}
-
-[data-theme="modern"] .tab-indicator {
-    border-radius: var(--radius-sm);
 }
 
 .tab-badge {
@@ -1216,10 +1169,6 @@ button:disabled {
     transition: transform 0.2s var(--ease), background 0.2s ease, box-shadow 0.3s ease, opacity 0.2s ease;
 }
 
-[data-theme="modern"] .btn {
-    border-radius: var(--radius);
-}
-
 .btn:active:not(:disabled) {
     transform: scale(0.97);
 }
@@ -1229,11 +1178,6 @@ button:disabled {
     background: var(--accent);
     color: var(--accent-ink);
     box-shadow: 0 12px 24px -12px rgba(91, 58, 41, 0.7);
-}
-
-[data-theme="modern"] .btn-primary,
-[data-theme="modern"] .btn-primary:hover:not(:disabled) {
-    box-shadow: none;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -1285,11 +1229,6 @@ button:disabled {
 .toast-undo-btn {
     font-weight: 700;
     color: #e8c9a3;
-}
-
-[data-theme="modern"] .toast-undo-btn {
-    color: #fff;
-    text-decoration: underline;
 }
 
 /* ========================

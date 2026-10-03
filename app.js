@@ -1129,43 +1129,10 @@
     });
 
     // ========================
-    // THEME
-    // ========================
-
-    const THEME_KEY = 'kawusiomat_theme';
-    const themeToggleBtn = $('theme-toggle-btn');
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-
-    const updateThemeBtn = () => {
-        const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
-        themeColorMeta.setAttribute('content', isModern ? '#f2f2f2' : '#f7f1e8');
-        themeToggleBtn.title = isModern
-            ? 'Motyw: Nowoczesny. Kliknij, aby przełączyć na Ciepły'
-            : 'Motyw: Ciepły. Kliknij, aby przełączyć na Nowoczesny';
-    };
-
-    themeToggleBtn.addEventListener('click', () => {
-        const isModern = document.documentElement.getAttribute('data-theme') === 'modern';
-        try {
-            if (isModern) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem(THEME_KEY, 'classic');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'modern');
-                localStorage.setItem(THEME_KEY, 'modern');
-            }
-        } catch {
-            // brak dostępu do localStorage
-        }
-        updateThemeBtn();
-    });
-
-    // ========================
     // INIT
     // ========================
 
     setGreeting();
-    updateThemeBtn();
     renderCount(false);
     showScreen(1);
 })();
